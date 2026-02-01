@@ -18,9 +18,10 @@ function Login({ onLogin }) {
   const cargarUsuarios = async () => {
     try {
       const response = await axios.get(`${API_URL}/auth/usuarios`);
-      setUsuarios(response.data);
+      setUsuarios(response.data || []);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
+      setUsuarios([]);
     }
   };
 
