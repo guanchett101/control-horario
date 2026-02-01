@@ -90,7 +90,42 @@
     Sistema de gestión de horarios y personal. Configuración de asistencia. Panel de control administrativo.
   </div>
   <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
-  <div id="root" class="notranslate" translate="no"></div>
+
+  <!-- Loader HTML Puro: Si ves esto, el HTML cargó bien. Si desaparece y queda blanco, React falló. -->
+  <div id="root" class="notranslate" translate="no">
+    <div style="
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+      ">
+      <h2 style="margin-bottom: 20px;">Iniciando Sistema...</h2>
+      <div style="
+          width: 50px;
+          height: 50px;
+          border: 5px solid #ddd;
+          border-top-color: #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        "></div>
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">Versión Móvil Segura</p>
+    </div>
+    <style>
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </div>
 </body>
 
 </html>
