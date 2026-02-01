@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerrar Sesión - Control Horarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        button {
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .success {
+            color: #10b981;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚪</h1>
+        <p>Cerrar Sesión</p>
+        <button onclick="logout()">Cerrar Sesión Ahora</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        function logout() {
+            // Limpiar todo el localStorage
+            localStorage.clear();
+            
+            // Limpiar sessionStorage también
+            sessionStorage.clear();
+            
+            // Mostrar mensaje
+            document.getElementById('message').innerHTML = '<div class="success">✅ Sesión cerrada</div>';
+            
+            // Redirigir al login después de 1 segundo
+            setTimeout(function() {
+                window.location.href = '/';
+            }, 1000);
+        }
+        
+        // Auto-ejecutar al cargar la página
+        window.onload = function() {
+            // Si viene con ?auto=1, cerrar automáticamente
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auto') === '1') {
+                logout();
+            }
+        };
+    </script>
+</body>
+</html>
