@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm ci && npm run build",
+  "buildCommand": "npm install --prefix frontend && npm run build --prefix frontend",
   "outputDirectory": "frontend/build",
-  "env": {
-    "REACT_APP_API_URL": "/api",
-    "NODE_VERSION": "18"
-  },
+  "installCommand": "npm install --prefix frontend",
+  "framework": null,
   "routes": [
     {
       "src": "/api/auth/(.*)",
