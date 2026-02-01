@@ -40,34 +40,34 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div style={{ backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
       
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {/* Header con reloj */}
         <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderRadius: '20px',
-          padding: '2.5rem',
+          background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+          borderRadius: '8px',
+          padding: '2rem',
           color: 'white',
           marginBottom: '2rem',
-          boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
+          boxShadow: '0 2px 12px rgba(30, 60, 114, 0.15)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: '600' }}>
-                Hola, {user.nombre} 👋
+              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: '600' }}>
+                Hola, {user.nombre}
               </h1>
-              <p style={{ margin: 0, opacity: 0.9, fontSize: '1rem' }}>
+              <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem' }}>
                 {formatearFecha(horaActual)}
               </p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '3rem', fontWeight: '700', lineHeight: 1 }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: '600', lineHeight: 1, fontFamily: 'monospace' }}>
                 {formatearHora(horaActual)}
               </div>
-              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginTop: '0.5rem' }}>
-                {user.rol === 'admin' ? '👑 Administrador' : '👤 Empleado'}
+              <div style={{ fontSize: '0.875rem', opacity: 0.9, marginTop: '0.5rem' }}>
+                {user.rol === 'admin' ? 'Administrador' : 'Empleado'}
               </div>
             </div>
           </div>
@@ -76,35 +76,36 @@ function Dashboard({ user, onLogout }) {
         {/* Estadísticas */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '1.5rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+          gap: '1.25rem',
           marginBottom: '2rem'
         }}>
           <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '8px',
             padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e8ecef'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+            border: '1px solid #e5e7eb'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                width: '48px',
+                height: '48px',
+                borderRadius: '8px',
+                background: '#10b981',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.5rem'
+                fontSize: '1.5rem',
+                color: 'white'
               }}>
-                👥
+                ✓
               </div>
               <div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
                   Presentes
                 </div>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#1f2937' }}>
+                <div style={{ fontSize: '1.875rem', fontWeight: '600', color: '#111827' }}>
                   {empleadosPresentes}
                 </div>
               </div>
@@ -113,29 +114,30 @@ function Dashboard({ user, onLogout }) {
 
           <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '8px',
             padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e8ecef'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+            border: '1px solid #e5e7eb'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                width: '48px',
+                height: '48px',
+                borderRadius: '8px',
+                background: '#ef4444',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.5rem'
+                fontSize: '1.5rem',
+                color: 'white'
               }}>
-                🚪
+                ←
               </div>
               <div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
                   Salieron
                 </div>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#1f2937' }}>
+                <div style={{ fontSize: '1.875rem', fontWeight: '600', color: '#111827' }}>
                   {empleadosSalieron}
                 </div>
               </div>
@@ -144,29 +146,30 @@ function Dashboard({ user, onLogout }) {
 
           <div style={{
             background: 'white',
-            borderRadius: '16px',
+            borderRadius: '8px',
             padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e8ecef'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+            border: '1px solid #e5e7eb'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                width: '48px',
+                height: '48px',
+                borderRadius: '8px',
+                background: '#3b82f6',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.5rem'
+                fontSize: '1.5rem',
+                color: 'white'
               }}>
-                📊
+                #
               </div>
               <div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
                   Total Hoy
                 </div>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#1f2937' }}>
+                <div style={{ fontSize: '1.875rem', fontWeight: '600', color: '#111827' }}>
                   {totalRegistros}
                 </div>
               </div>
@@ -177,40 +180,40 @@ function Dashboard({ user, onLogout }) {
         {/* Acciones Rápidas */}
         <div style={{
           background: 'white',
-          borderRadius: '16px',
-          padding: '2rem',
+          borderRadius: '8px',
+          padding: '1.75rem',
           marginBottom: '2rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: '1px solid #e8ecef'
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          border: '1px solid #e5e7eb'
         }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
+          <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
             Acciones Rápidas
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <Link to="/registro" style={{
               textDecoration: 'none',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: '#1e3c72',
               color: 'white',
               padding: '1.25rem',
-              borderRadius: '12px',
+              borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+              transition: 'all 0.2s',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 60, 114, 0.2)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
             }}>
-              <span style={{ fontSize: '2rem' }}>⏰</span>
+              <span style={{ fontSize: '1.75rem' }}>⏰</span>
               <div>
-                <div style={{ fontWeight: '600', fontSize: '1rem' }}>Registrar</div>
-                <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Entrada/Salida</div>
+                <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Registrar Horario</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>Entrada/Salida</div>
               </div>
             </Link>
 
@@ -218,55 +221,55 @@ function Dashboard({ user, onLogout }) {
               <>
                 <Link to="/empleados" style={{
                   textDecoration: 'none',
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  background: '#10b981',
                   color: 'white',
                   padding: '1.25rem',
-                  borderRadius: '12px',
+                  borderRadius: '8px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 12px rgba(240, 147, 251, 0.3)'
+                  transition: 'all 0.2s',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(240, 147, 251, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
                 }}>
-                  <span style={{ fontSize: '2rem' }}>👥</span>
+                  <span style={{ fontSize: '1.75rem' }}>👥</span>
                   <div>
-                    <div style={{ fontWeight: '600', fontSize: '1rem' }}>Empleados</div>
-                    <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Gestionar</div>
+                    <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Empleados</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>Gestionar</div>
                   </div>
                 </Link>
 
                 <Link to="/reportes" style={{
                   textDecoration: 'none',
-                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  background: '#3b82f6',
                   color: 'white',
                   padding: '1.25rem',
-                  borderRadius: '12px',
+                  borderRadius: '8px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 12px rgba(79, 172, 254, 0.3)'
+                  transition: 'all 0.2s',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(79, 172, 254, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 172, 254, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
                 }}>
-                  <span style={{ fontSize: '2rem' }}>📈</span>
+                  <span style={{ fontSize: '1.75rem' }}>📊</span>
                   <div>
-                    <div style={{ fontWeight: '600', fontSize: '1rem' }}>Reportes</div>
-                    <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Ver estadísticas</div>
+                    <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Reportes</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>Ver estadísticas</div>
                   </div>
                 </Link>
               </>
@@ -277,13 +280,13 @@ function Dashboard({ user, onLogout }) {
         {/* Registros de Hoy */}
         <div style={{
           background: 'white',
-          borderRadius: '16px',
-          padding: '2rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: '1px solid #e8ecef'
+          borderRadius: '8px',
+          padding: '1.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          border: '1px solid #e5e7eb'
         }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
-            📋 Actividad de Hoy
+          <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
+            Actividad de Hoy
           </h3>
           
           {loading ? (
@@ -304,32 +307,30 @@ function Dashboard({ user, onLogout }) {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '1rem',
-                  borderBottom: '1px solid #e8ecef',
+                  borderBottom: '1px solid #f3f4f6',
                   gap: '1rem',
                   flexWrap: 'wrap'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                     <div style={{
-                      width: '45px',
-                      height: '45px',
-                      borderRadius: '50%',
-                      background: registro.hora_salida 
-                        ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '8px',
+                      background: registro.hora_salida ? '#ef4444' : '#10b981',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: 'white',
                       fontWeight: '600',
-                      fontSize: '1.1rem'
+                      fontSize: '1rem'
                     }}>
                       {registro.empleados.nombre.charAt(0)}{registro.empleados.apellido.charAt(0)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1rem' }}>
+                      <div style={{ fontWeight: '600', color: '#111827', fontSize: '0.95rem' }}>
                         {registro.empleados.nombre} {registro.empleados.apellido}
                       </div>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
                         {registro.empleados.cargo}
                       </div>
                     </div>
@@ -337,18 +338,18 @@ function Dashboard({ user, onLogout }) {
                   
                   <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
                         Entrada
                       </div>
-                      <div style={{ fontWeight: '600', color: '#1f2937' }}>
+                      <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
                         {registro.hora_entrada || '-'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
                         Salida
                       </div>
-                      <div style={{ fontWeight: '600', color: '#1f2937' }}>
+                      <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
                         {registro.hora_salida || '-'}
                       </div>
                     </div>
@@ -357,9 +358,9 @@ function Dashboard({ user, onLogout }) {
                         <span style={{
                           background: '#fee2e2',
                           color: '#dc2626',
-                          padding: '0.5rem 1rem',
-                          borderRadius: '20px',
-                          fontSize: '0.875rem',
+                          padding: '0.4rem 0.9rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
                           fontWeight: '600'
                         }}>
                           Salió
@@ -368,9 +369,9 @@ function Dashboard({ user, onLogout }) {
                         <span style={{
                           background: '#d1fae5',
                           color: '#059669',
-                          padding: '0.5rem 1rem',
-                          borderRadius: '20px',
-                          fontSize: '0.875rem',
+                          padding: '0.4rem 0.9rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
                           fontWeight: '600'
                         }}>
                           Presente

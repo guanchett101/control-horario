@@ -14,22 +14,23 @@ body {
 }
 
 .navbar {
-  background: #2c3e50;
+  background: #1e3c72;
   color: white;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .navbar h1 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .navbar-menu {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -37,52 +38,54 @@ body {
   color: white;
   text-decoration: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: background 0.3s;
+  borderRadius: 6px;
+  transition: background 0.2s;
+  font-size: 0.95rem;
 }
 
 .navbar-menu a:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.15);
 }
 
 .btn {
   padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: 4px;
+  borderRadius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  font-weight: 500;
 }
 
 .btn-primary {
-  background: #3498db;
+  background: #3b82f6;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: #2563eb;
 }
 
 .btn-success {
-  background: #27ae60;
+  background: #10b981;
   color: white;
 }
 
 .btn-success:hover {
-  background: #229954;
+  background: #059669;
 }
 
 .btn-danger {
-  background: #e74c3c;
+  background: #ef4444;
   color: white;
 }
 
 .btn-danger:hover {
-  background: #c0392b;
+  background: #dc2626;
 }
 
 .btn-logout {
-  background: #e74c3c;
+  background: #ef4444;
   color: white;
   padding: 0.5rem 1rem;
 }
@@ -95,9 +98,10 @@ body {
 
 .card {
   background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  borderRadius: 8px;
+  padding: 1.75rem;
+  boxShadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
   margin-bottom: 1rem;
 }
 
@@ -109,15 +113,25 @@ body {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 0.65rem;
+  border: 1px solid #d1d5db;
+  borderRadius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .table {
@@ -128,66 +142,71 @@ body {
 
 .table th,
 .table td {
-  padding: 0.8rem;
+  padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
 }
 
 .table th {
-  background: #f8f9fa;
+  background: #f9fafb;
   font-weight: 600;
+  color: #374151;
 }
 
 .table tr:hover {
-  background: #f8f9fa;
+  background: #f9fafb;
 }
 
 .alert {
   padding: 1rem;
-  border-radius: 4px;
+  borderRadius: 6px;
   margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 .alert-success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 
 .alert-error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
   margin-bottom: 2rem;
 }
 
 .stat-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  borderRadius: 8px;
+  boxShadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .stat-card h3 {
-  color: #7f8c8d;
-  font-size: 0.9rem;
+  color: #6b7280;
+  font-size: 0.875rem;
   margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .stat-card .value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #2c3e50;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #111827;
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #7f8c8d;
+  color: #6b7280;
 }
