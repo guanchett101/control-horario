@@ -10,8 +10,13 @@ function Dashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [horaActual, setHoraActual] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Detectar si es móvil
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile);
+    
     cargarRegistrosHoy();
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
     return () => clearInterval(interval);
@@ -19,15 +24,27 @@ function Dashboard({ user, onLogout }) {
 
   const cargarRegistrosHoy = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      // Timeout de 10 segundos para móviles lentos
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
       const response = await axios.get(`${API_URL}/registros/hoy`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       setRegistrosHoy(Array.isArray(response.data) ? response.data : []);
       setError(null);
     } catch (error) {
       console.error('Error al cargar registros:', error);
-      setError('No se pudieron cargar los registros');
+      if (error.name === 'AbortError') {
+        setError('Conexión lenta - Intenta recargar');
+      } else {
+        setError('No se pudieron cargar los registros');
+      }
       setRegistrosHoy([]);
     } finally {
       setLoading(false);
@@ -88,9 +105,32 @@ function Dashboard({ user, onLogout }) {
             borderRadius: '8px',
             padding: '1rem',
             marginBottom: '1.5rem',
-            color: '#991b1b'
+            color: '#991b1b',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}>
-            ⚠️ {error} - Mostrando datos en caché
+            <span>⚠️ {error}</span>
+            <button 
+              onClick={() => {
+                setLoading(true);
+                setError(null);
+                cargarRegistrosHoy();
+              }}
+              style={{
+                background: '#dc2626',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem'
+              }}
+            >
+              🔄 Reintentar
+            </button>
           </div>
         )}
 
@@ -321,20 +361,20 @@ function Dashboard({ user, onLogout }) {
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              {registrosHoy.map((registro) => (
+              {registrosHoy.slice(0, isMobile ? 5 : registrosHoy.length).map((registro) => (
                 <div key={registro.id} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '1rem',
+                  padding: isMobile ? '0.75rem' : '1rem',
                   borderBottom: '1px solid #f3f4f6',
                   gap: '1rem',
                   flexWrap: 'wrap'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                     <div style={{
-                      width: '42px',
-                      height: '42px',
+                      width: isMobile ? '36px' : '42px',
+                      height: isMobile ? '36px' : '42px',
                       borderRadius: '8px',
                       background: registro.hora_salida ? '#ef4444' : '#10b981',
                       display: 'flex',
@@ -342,23 +382,25 @@ function Dashboard({ user, onLogout }) {
                       justifyContent: 'center',
                       color: 'white',
                       fontWeight: '600',
-                      fontSize: '1rem'
+                      fontSize: isMobile ? '0.85rem' : '1rem'
                     }}>
-                      {registro.empleados.nombre.charAt(0)}{registro.empleados.apellido.charAt(0)}
+                      {registro.empleados?.nombre?.charAt(0) || '?'}{registro.empleados?.apellido?.charAt(0) || '?'}
                     </div>
                     <div>
-                      <div style={{ fontWeight: '600', color: '#111827', fontSize: '0.95rem' }}>
-                        {registro.empleados.nombre} {registro.empleados.apellido}
+                      <div style={{ fontWeight: '600', color: '#111827', fontSize: isMobile ? '0.85rem' : '0.95rem' }}>
+                        {registro.empleados?.nombre || 'N/A'} {registro.empleados?.apellido || ''}
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                        {registro.empleados.cargo}
-                      </div>
+                      {!isMobile && (
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                          {registro.empleados?.cargo || 'Sin cargo'}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: isMobile ? '1rem' : '2rem', alignItems: 'center', fontSize: isMobile ? '0.85rem' : '1rem' }}>
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
                         Entrada
                       </div>
                       <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
@@ -366,41 +408,48 @@ function Dashboard({ user, onLogout }) {
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
                         Salida
                       </div>
                       <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
                         {registro.hora_salida || '-'}
                       </div>
                     </div>
-                    <div>
-                      {registro.hora_salida ? (
-                        <span style={{
-                          background: '#fee2e2',
-                          color: '#dc2626',
-                          padding: '0.4rem 0.9rem',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          fontWeight: '600'
-                        }}>
-                          Salió
-                        </span>
-                      ) : (
-                        <span style={{
-                          background: '#d1fae5',
-                          color: '#059669',
-                          padding: '0.4rem 0.9rem',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          fontWeight: '600'
-                        }}>
-                          Presente
-                        </span>
-                      )}
-                    </div>
+                    {!isMobile && (
+                      <div>
+                        {registro.hora_salida ? (
+                          <span style={{
+                            background: '#fee2e2',
+                            color: '#dc2626',
+                            padding: '0.4rem 0.9rem',
+                            borderRadius: '6px',
+                            fontSize: '0.8rem',
+                            fontWeight: '600'
+                          }}>
+                            Salió
+                          </span>
+                        ) : (
+                          <span style={{
+                            background: '#d1fae5',
+                            color: '#059669',
+                            padding: '0.4rem 0.9rem',
+                            borderRadius: '6px',
+                            fontSize: '0.8rem',
+                            fontWeight: '600'
+                          }}>
+                            Presente
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
+              {isMobile && registrosHoy.length > 5 && (
+                <div style={{ textAlign: 'center', padding: '1rem', color: '#6b7280', fontSize: '0.85rem' }}>
+                  Mostrando 5 de {registrosHoy.length} registros
+                </div>
+              )}
             </div>
           )}
         </div>
