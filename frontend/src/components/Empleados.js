@@ -9,6 +9,7 @@ function Empleados({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -20,6 +21,9 @@ function Empleados({ user, onLogout }) {
   });
 
   useEffect(() => {
+    // Detectar móvil
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile);
     cargarEmpleados();
   }, []);
 
@@ -139,14 +143,24 @@ function Empleados({ user, onLogout }) {
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
 
-      <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ color: '#111827' }}>👥 Gestión de Empleados</h2>
+      <div className="container" style={{ maxWidth: isMobile ? '100%' : '1200px', padding: isMobile ? '0.75rem' : '0 1rem' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: isMobile ? '1rem' : '2rem',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <h2 style={{ color: '#111827', fontSize: isMobile ? '1.25rem' : '1.5rem', margin: 0 }}>
+            👥 {isMobile ? 'Empleados' : 'Gestión de Empleados'}
+          </h2>
           <button
             onClick={() => showForm ? cancelar() : setShowForm(true)}
             className="btn btn-primary"
+            style={{ fontSize: isMobile ? '0.85rem' : '1rem', padding: isMobile ? '0.5rem 1rem' : '0.6rem 1.2rem' }}
           >
-            {showForm ? 'Cancelar' : '+ Nuevo Empleado'}
+            {showForm ? 'Cancelar' : isMobile ? '+ Nuevo' : '+ Nuevo Empleado'}
           </button>
         </div>
 
@@ -154,16 +168,16 @@ function Empleados({ user, onLogout }) {
           <div style={{
             background: 'white',
             borderRadius: '8px',
-            padding: '2rem',
-            marginBottom: '2rem',
+            padding: isMobile ? '1rem' : '2rem',
+            marginBottom: isMobile ? '1rem' : '2rem',
             boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
             border: '1px solid #e5e7eb'
           }}>
-            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: '600', color: '#111827' }}>
               {editando ? '✏️ Editar Empleado' : '➕ Nuevo Empleado'}
             </h3>
             <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
                   <label>Nombre *</label>
                   <input
@@ -187,7 +201,7 @@ function Empleados({ user, onLogout }) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
                   <label>Email</label>
                   <input
@@ -209,7 +223,7 @@ function Empleados({ user, onLogout }) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
                   <label>Cargo *</label>
                   <input
@@ -271,11 +285,11 @@ function Empleados({ user, onLogout }) {
                 </>
               )}
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                <button type="submit" className="btn btn-success">
-                  {editando ? '💾 Guardar Cambios' : '✅ Crear Empleado'}
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexDirection: isMobile ? 'column' : 'row' }}>
+                <button type="submit" className="btn btn-success" style={{ width: isMobile ? '100%' : 'auto' }}>
+                  {editando ? '💾 Guardar' : '✅ Crear'}
                 </button>
-                <button type="button" onClick={cancelar} className="btn" style={{ background: '#6b7280' }}>
+                <button type="button" onClick={cancelar} className="btn" style={{ background: '#6b7280', width: isMobile ? '100%' : 'auto' }}>
                   Cancelar
                 </button>
               </div>
@@ -286,11 +300,11 @@ function Empleados({ user, onLogout }) {
         <div style={{
           background: 'white',
           borderRadius: '8px',
-          padding: '2rem',
+          padding: isMobile ? '1rem' : '2rem',
           boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
           border: '1px solid #e5e7eb'
         }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
+          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.125rem', fontWeight: '600', color: '#111827' }}>
             Lista de Empleados ({empleados.length})
           </h3>
 
@@ -303,7 +317,71 @@ function Empleados({ user, onLogout }) {
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
               No hay empleados registrados
             </div>
+          ) : isMobile ? (
+            // Vista de tarjetas para móvil
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {empleados.map((emp) => (
+                <div key={emp.id} style={{
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  background: '#f9fafb'
+                }}>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ fontWeight: '600', fontSize: '1rem', color: '#111827', marginBottom: '0.25rem' }}>
+                      {emp.nombre} {emp.apellido}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                      {emp.cargo}
+                    </div>
+                  </div>
+                  
+                  {(emp.email || emp.telefono) && (
+                    <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+                      {emp.email && <div>📧 {emp.email}</div>}
+                      {emp.telefono && <div>📱 {emp.telefono}</div>}
+                    </div>
+                  )}
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                    <button
+                      onClick={() => editarEmpleado(emp)}
+                      style={{
+                        flex: 1,
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.5rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
+                      style={{
+                        flex: 1,
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.5rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
+            // Vista de tabla para escritorio
             <div className="table-responsive">
               <table className="table">
                 <thead>
