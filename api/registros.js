@@ -1,4 +1,3 @@
-const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
@@ -6,117 +5,120 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-const app = express();
-app.use(express.json());
+module.exports = async (req, res) => {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-// Registrar entrada
-app.post('/entrada', async (req, res) => {
-  try {
-    const { empleadoId } = req.body;
-    const fecha = new Date().toISOString().split('T')[0];
-    const hora = new Date().toTimeString().split(' ')[0];
-
-    const { data, error } = await supabase
-      .from('registros_horario')
-      .insert([
-        {
-          empleado_id: empleadoId,
-          fecha,
-          hora_entrada: hora
-        }
-      ])
-      .select();
-
-    if (error) throw error;
-    res.status(201).json({ id: data[0].id, message: 'Entrada registrada', hora });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
   }
-});
 
-// Registrar salida
-app.post('/salida', async (req, res) => {
+  const path = req.url.replace('/api/registros', '');
+
   try {
-    const { empleadoId } = req.body;
-    const fecha = new Date().toISOString().split('T')[0];
-    const hora = new Date().toTimeString().split(' ')[0];
+    // Registrar entrada
+    if (req.method === 'POST' && path === '/entrada') {
+      const { empleadoId } = req.body;
+      const fecha = new Date().toISOString().split('T')[0];
+      const hora = new Date().toTimeString().split(' ')[0];
 
-    const { data: registros, error: searchError } = await supabase
-      .from('registros_horario')
-      .select('*')
-      .eq('empleado_id', empleadoId)
-      .eq('fecha', fecha)
-      .is('hora_salida', null)
-      .order('id', { ascending: false })
-      .limit(1);
+      const { data, error } = await supabase
+        .from('registros_horario')
+        .insert([
+          {
+            empleado_id: empleadoId,
+            fecha,
+            hora_entrada: hora
+          }
+        ])
+        .select();
 
-    if (searchError) throw searchError;
-    if (!registros || registros.length === 0) {
-      return res.status(404).json({ error: 'No hay registro de entrada para hoy' });
+      if (error) throw error;
+      return res.status(201).json({ id: data[0].id, message: 'Entrada registrada', hora });
     }
 
-    const { error: updateError } = await supabase
-      .from('registros_horario')
-      .update({ hora_salida: hora })
-      .eq('id', registros[0].id);
+    // Registrar salida
+    if (req.method === 'POST' && path === '/salida') {
+      const { empleadoId } = req.body;
+      const fecha = new Date().toISOString().split('T')[0];
+      const hora = new Date().toTimeString().split(' ')[0];
 
-    if (updateError) throw updateError;
-    res.json({ message: 'Salida registrada', hora });
+      const { data: registros, error: searchError } = await supabase
+        .from('registros_horario')
+        .select('*')
+        .eq('empleado_id', empleadoId)
+        .eq('fecha', fecha)
+        .is('hora_salida', null)
+        .order('id', { ascending: false })
+        .limit(1);
+
+      if (searchError) throw searchError;
+      if (!registros || registros.length === 0) {
+        return res.status(404).json({ error: 'No hay registro de entrada para hoy' });
+      }
+
+      const { error: updateError } = await supabase
+        .from('registros_horario')
+        .update({ hora_salida: hora })
+        .eq('id', registros[0].id);
+
+      if (updateError) throw updateError;
+      return res.json({ message: 'Salida registrada', hora });
+    }
+
+    // Obtener registros por empleado y rango de fechas
+    if (req.method === 'GET' && path.startsWith('/empleado/')) {
+      const id = path.split('/')[2];
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const fechaInicio = url.searchParams.get('fechaInicio');
+      const fechaFin = url.searchParams.get('fechaFin');
+
+      const { data, error } = await supabase
+        .from('registros_horario')
+        .select(`
+          *,
+          empleados (
+            nombre,
+            apellido
+          )
+        `)
+        .eq('empleado_id', id)
+        .gte('fecha', fechaInicio)
+        .lte('fecha', fechaFin)
+        .order('fecha', { ascending: false })
+        .order('hora_entrada', { ascending: false });
+
+      if (error) throw error;
+      return res.json(data);
+    }
+
+    // Obtener todos los registros del día
+    if (req.method === 'GET' && path === '/hoy') {
+      const fecha = new Date().toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('registros_horario')
+        .select(`
+          *,
+          empleados (
+            nombre,
+            apellido,
+            cargo
+          )
+        `)
+        .eq('fecha', fecha)
+        .order('hora_entrada', { ascending: false });
+
+      if (error) throw error;
+      return res.json(data);
+    }
+
+    res.status(404).json({ error: 'Ruta no encontrada' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-// Obtener registros por empleado y rango de fechas
-app.get('/empleado/:id', async (req, res) => {
-  try {
-    const { fechaInicio, fechaFin } = req.query;
-
-    const { data, error } = await supabase
-      .from('registros_horario')
-      .select(`
-        *,
-        empleados (
-          nombre,
-          apellido
-        )
-      `)
-      .eq('empleado_id', req.params.id)
-      .gte('fecha', fechaInicio)
-      .lte('fecha', fechaFin)
-      .order('fecha', { ascending: false })
-      .order('hora_entrada', { ascending: false });
-
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Obtener todos los registros del día
-app.get('/hoy', async (req, res) => {
-  try {
-    const fecha = new Date().toISOString().split('T')[0];
-
-    const { data, error } = await supabase
-      .from('registros_horario')
-      .select(`
-        *,
-        empleados (
-          nombre,
-          apellido,
-          cargo
-        )
-      `)
-      .eq('fecha', fecha)
-      .order('hora_entrada', { ascending: false });
-
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-module.exports = app;
+};
