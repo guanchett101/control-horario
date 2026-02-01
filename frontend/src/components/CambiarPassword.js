@@ -11,16 +11,12 @@ function CambiarPassword({ user, onLogout }) {
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mostrarActual, setMostrarActual] = useState(false);
-  const [mostrarNueva, setMostrarNueva] = useState(false);
-  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje('');
     setError('');
 
-    // Validaciones
     if (passwordNueva.length < 6) {
       setError('La nueva contraseña debe tener al menos 6 caracteres');
       return;
@@ -39,30 +35,20 @@ function CambiarPassword({ user, onLogout }) {
     setLoading(true);
 
     try {
-      const userId = user.id;
-      
-      if (!userId) {
-        throw new Error('No se pudo identificar el usuario');
-      }
-
-      const response = await axios.post(`${API_URL}/auth/cambiar-password`, {
-        userId: userId,
+      await axios.post(`${API_URL}/auth/cambiar-password`, {
+        userId: user.id,
         passwordActual: passwordActual,
         passwordNueva: passwordNueva
       });
 
-      setMensaje('✅ ' + response.data.message);
+      setMensaje('✅ Contraseña cambiada exitosamente');
       setPasswordActual('');
       setPasswordNueva('');
       setPasswordConfirmar('');
       
-      setTimeout(() => {
-        setMensaje('');
-      }, 5000);
+      setTimeout(() => setMensaje(''), 5000);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.message || 'Error al cambiar contraseña';
-      setError(errorMsg);
-      console.error('Error completo:', err);
+      setError(err.response?.data?.error || 'Error al cambiar contraseña');
     } finally {
       setLoading(false);
     }
@@ -104,9 +90,7 @@ function CambiarPassword({ user, onLogout }) {
               padding: '1rem',
               borderRadius: '8px',
               marginBottom: '1rem',
-              border: '1px solid #a7f3d0',
-              fontSize: '0.95rem',
-              fontWeight: '500'
+              border: '1px solid #a7f3d0'
             }}>
               {mensaje}
             </div>
@@ -119,9 +103,7 @@ function CambiarPassword({ user, onLogout }) {
               padding: '1rem',
               borderRadius: '8px',
               marginBottom: '1rem',
-              border: '1px solid #fecaca',
-              fontSize: '0.95rem',
-              fontWeight: '500'
+              border: '1px solid #fecaca'
             }}>
               ❌ {error}
             </div>
@@ -130,34 +112,17 @@ function CambiarPassword({ user, onLogout }) {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Contraseña Actual *</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={mostrarActual ? "text" : "password"}
-                  value={passwordActual}
-                  onChange={(e) => setPasswordActual(e.target.value)}
-                  required
-                  placeholder="Ingresa tu contraseña actual"
-                  readOnly
-                  onFocus={(e) => e.target.removeAttribute('readonly')}
-                  style={{ paddingRight: '3rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarActual(!mostrarActual)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.5rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  {mostrarActual ? '🙈' : '👁️'}
-                </button>
-              </div>
+              <input
+                type="text"
+                value={passwordActual}
+                onChange={(e) => setPasswordActual(e.target.value)}
+                required
+                placeholder="Ingresa tu contraseña actual"
+                style={{
+                  WebkitTextSecurity: 'disc',
+                  fontFamily: 'text-security-disc'
+                }}
+              />
               <small style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
                 Si eres nuevo, tu contraseña es: <strong>123456</strong>
               </small>
@@ -165,68 +130,34 @@ function CambiarPassword({ user, onLogout }) {
 
             <div className="form-group">
               <label>Nueva Contraseña *</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={mostrarNueva ? "text" : "password"}
-                  value={passwordNueva}
-                  onChange={(e) => setPasswordNueva(e.target.value)}
-                  required
-                  minLength="6"
-                  placeholder="Mínimo 6 caracteres"
-                  readOnly
-                  onFocus={(e) => e.target.removeAttribute('readonly')}
-                  style={{ paddingRight: '3rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarNueva(!mostrarNueva)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.5rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  {mostrarNueva ? '🙈' : '👁️'}
-                </button>
-              </div>
+              <input
+                type="text"
+                value={passwordNueva}
+                onChange={(e) => setPasswordNueva(e.target.value)}
+                required
+                minLength="6"
+                placeholder="Mínimo 6 caracteres"
+                style={{
+                  WebkitTextSecurity: 'disc',
+                  fontFamily: 'text-security-disc'
+                }}
+              />
             </div>
 
             <div className="form-group">
               <label>Confirmar Nueva Contraseña *</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={mostrarConfirmar ? "text" : "password"}
-                  value={passwordConfirmar}
-                  onChange={(e) => setPasswordConfirmar(e.target.value)}
-                  required
-                  minLength="6"
-                  placeholder="Repite la nueva contraseña"
-                  readOnly
-                  onFocus={(e) => e.target.removeAttribute('readonly')}
-                  style={{ paddingRight: '3rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.5rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  {mostrarConfirmar ? '🙈' : '👁️'}
-                </button>
-              </div>
+              <input
+                type="text"
+                value={passwordConfirmar}
+                onChange={(e) => setPasswordConfirmar(e.target.value)}
+                required
+                minLength="6"
+                placeholder="Repite la nueva contraseña"
+                style={{
+                  WebkitTextSecurity: 'disc',
+                  fontFamily: 'text-security-disc'
+                }}
+              />
             </div>
 
             <button 
@@ -252,7 +183,7 @@ function CambiarPassword({ user, onLogout }) {
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#4b5563', fontSize: '0.85rem', lineHeight: '1.8' }}>
               <li>Usa al menos 6 caracteres</li>
               <li>Combina letras y números</li>
-              <li>Haz clic en el ojo 👁️ para ver lo que escribes</li>
+              <li>No uses información personal obvia</li>
               <li>Cambia tu contraseña periódicamente</li>
             </ul>
           </div>
