@@ -9,6 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="Content-Language" content="es" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Control de Horarios</title>
@@ -19,9 +21,13 @@
           font-size: 16px !important;
         }
       }
+      /* Prevenir traducción automática */
+      body {
+        translate: no;
+      }
     </style>
   </head>
-  <body>
+  <body translate="no" class="notranslate">
     <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
     <div id="root"></div>
   </body>
