@@ -85,6 +85,47 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Cambiar contraseña
+router.post('/cambiar-password', async (req, res) => {
+  try {
+    const { userId, passwordActual, passwordNueva } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'ID de usuario no proporcionado' });
+    }
+
+    // Obtener usuario actual
+    const { data: usuario, error: userError } = await supabase
+      .from('usuarios')
+      .select('password_hash')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado. Cierra sesión y vuelve a entrar.' });
+    }
+
+    // Verificar contraseña actual
+    const isMatch = await bcrypt.compare(passwordActual, usuario.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+    }
+
+    // Actualizar con nueva contraseña
+    const nuevoHash = await bcrypt.hash(passwordNueva, 10);
+    const { error: updateError } = await supabase
+      .from('usuarios')
+      .update({ password_hash: nuevoHash })
+      .eq('id', userId);
+
+    if (updateError) throw updateError;
+
+    res.json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Obtener lista de usuarios (sin contraseñas)
 router.get('/usuarios', async (req, res) => {
   try {
