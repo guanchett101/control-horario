@@ -1,8 +1,16 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/empleados/:path*",
+      "destination": "/api/empleados.js"
+    },
+    {
+      "source": "/api/registros/:path*",
+      "destination": "/api/registros.js"
     }
   ]
 }
