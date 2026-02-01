@@ -88,15 +88,22 @@ module.exports = async (req, res) => {
       return res.json({ message: 'Empleado actualizado exitosamente' });
     }
 
-    // Desactivar empleado
+    // Desactivar empleado y eliminar usuario
     if (req.method === 'DELETE' && id) {
+      // Primero eliminar el usuario asociado
+      const { error: deleteUserError } = await supabase
+        .from('usuarios')
+        .delete()
+        .eq('empleado_id', id);
+
+      // Luego desactivar el empleado
       const { error } = await supabase
         .from('empleados')
         .update({ activo: false })
         .eq('id', id);
 
       if (error) throw error;
-      return res.json({ message: 'Empleado desactivado exitosamente' });
+      return res.json({ message: 'Empleado y usuario eliminados exitosamente' });
     }
 
     res.status(404).json({ error: 'Ruta no encontrada' });
