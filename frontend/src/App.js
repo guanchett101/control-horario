@@ -92,7 +92,7 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div className="App notranslate" translate="no" style={{ touchAction: 'manipulation' }}>
         <Routes>
           <Route
             path="/login"

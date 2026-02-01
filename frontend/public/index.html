@@ -85,10 +85,12 @@
 </head>
 
 <body translate="no" class="notranslate">
-  <!-- Texto oculto para forzar detección de idioma correcto por Chrome -->
-  <span style="display:none" aria-hidden="true">Sistema de control de horarios y asistencia para empleados.</span>
+  <!-- Texto oculto para forzar detección de idioma ES y evitar prompt de traducción -->
+  <div style="position:absolute; top:-9999px; left:-9999px;">
+    Sistema de gestión de horarios y personal. Configuración de asistencia. Panel de control administrativo.
+  </div>
   <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
-  <div id="root"></div>
+  <div id="root" class="notranslate" translate="no"></div>
 </body>
 
 </html>
