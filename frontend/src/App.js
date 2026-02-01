@@ -10,19 +10,41 @@ import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      if (token && userData) {
+        const parsedUser = JSON.parse(userData);
+        // Validar que el usuario tenga los campos necesarios
+        if (parsedUser && parsedUser.id && parsedUser.nombre) {
+          setUser(parsedUser);
+        } else {
+          // Si los datos están corruptos, limpiar
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar usuario:', error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   const handleLogin = (userData, token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    try {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    } catch (error) {
+      console.error('Error al guardar sesión:', error);
+      alert('Error al iniciar sesión. Por favor, intenta de nuevo.');
+    }
   };
 
   const handleLogout = () => {
@@ -30,6 +52,23 @@ function App() {
     localStorage.removeItem('user');
     setUser(null);
   };
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#f8f9fa'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
+          <div style={{ color: '#6b7280' }}>Cargando...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>

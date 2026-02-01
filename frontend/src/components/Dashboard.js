@@ -18,10 +18,15 @@ function Dashboard({ user, onLogout }) {
 
   const cargarRegistrosHoy = async () => {
     try {
-      const response = await axios.get(`${API_URL}/registros/hoy`);
-      setRegistrosHoy(response.data);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/registros/hoy`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      setRegistrosHoy(response.data || []);
     } catch (error) {
       console.error('Error al cargar registros:', error);
+      // Si hay error de autenticación, no hacer nada (el usuario sigue logueado)
+      setRegistrosHoy([]);
     } finally {
       setLoading(false);
     }
