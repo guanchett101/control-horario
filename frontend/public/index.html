@@ -85,20 +85,9 @@
 </head>
 
 <body translate="no" class="notranslate">
-  <!-- Gancho de idioma: Texto visible para el navegador pero invisible para el usuario (opacidad casi 0) -->
-  <div
-    style="position:fixed; bottom:0; left:0; width:100%; height:1px; opacity:0.01; overflow:hidden; pointer-events:none; z-index:-1; color:#000; background:#fff;">
-    <p>
-      Este es un sistema de control de horarios y asistencia para empleados en español.
-      Por favor no traducir esta página. La configuración regional es España o Latinoamérica.
-      Gestión de personal, reportes de horas, administración de empresas y usuarios.
-      Panel de control, inicio de sesión, registro de entrada y salida laboral.
-      Hoy es un buen día para trabajar. Calendario laboral y festivos.
-    </p>
-  </div>
   <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
 
-  <!-- Loader HTML Puro: Si ves esto, el HTML cargó bien. Si desaparece y queda blanco, React falló. -->
+  <!-- Loader Gráfico (Sin texto para evitar traducción antes de carga) -->
   <div id="root" class="notranslate" translate="no">
     <div style="
         display: flex;
@@ -106,20 +95,16 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        font-family: sans-serif;
         background-color: #f0f2f5;
-        color: #333;
       ">
-      <h2 style="margin-bottom: 20px;">Iniciando Sistema...</h2>
       <div style="
-          width: 50px;
-          height: 50px;
-          border: 5px solid #ddd;
+          width: 60px;
+          height: 60px;
+          border: 6px solid #e5e7eb;
           border-top-color: #3b82f6;
           border-radius: 50%;
-          animation: spin 1s linear infinite;
+          animation: spin 0.8s linear infinite;
         "></div>
-      <p style="margin-top: 20px; font-size: 14px; color: #666;">Versión Móvil Segura</p>
     </div>
     <style>
       @keyframes spin {
