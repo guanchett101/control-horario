@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Test Móvil - Control Horarios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        h1 { color: #1e3c72; margin-bottom: 1.5rem; text-align: center; }
+        .info { background: #e0f2fe; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .info strong { display: block; margin-bottom: 0.5rem; color: #1e3c72; }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        button:active { transform: scale(0.98); }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Chrome Móvil</h1>
+        
+        <div class="info">
+            <strong>Navegador:</strong>
+            <span id="browser">Detectando...</span>
+        </div>
+        
+        <div class="info">
+            <strong>Dispositivo:</strong>
+            <span id="device">Detectando...</span>
+        </div>
+        
+        <div class="info">
+            <strong>localStorage:</strong>
+            <span id="localStorage">Probando...</span>
+        </div>
+        
+        <div class="info">
+            <strong>sessionStorage:</strong>
+            <span id="sessionStorage">Probando...</span>
+        </div>
+        
+        <button onclick="testAPI()">🌐 Probar API</button>
+        
+        <div id="result"></div>
+        
+        <button onclick="window.location.href='/'">← Volver al Login</button>
+    </div>
+
+    <script>
+        // Detectar navegador
+        const ua = navigator.userAgent;
+        let browserName = 'Desconocido';
+        if (ua.includes('Chrome') && !ua.includes('Edge')) browserName = 'Chrome';
+        else if (ua.includes('Firefox')) browserName = 'Firefox';
+        else if (ua.includes('Safari') && !ua.includes('Chrome')) browserName = 'Safari';
+        else if (ua.includes('Edge')) browserName = 'Edge';
+        
+        document.getElementById('browser').textContent = browserName;
+        
+        // Detectar dispositivo
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+        document.getElementById('device').textContent = isMobile ? 'Móvil' : 'Escritorio';
+        
+        // Test localStorage
+        try {
+            localStorage.setItem('test', '123');
+            const val = localStorage.getItem('test');
+            localStorage.removeItem('test');
+            document.getElementById('localStorage').textContent = val === '123' ? '✅ Funciona' : '❌ No funciona';
+        } catch (e) {
+            document.getElementById('localStorage').textContent = '❌ Bloqueado: ' + e.message;
+        }
+        
+        // Test sessionStorage
+        try {
+            sessionStorage.setItem('test', '456');
+            const val = sessionStorage.getItem('test');
+            sessionStorage.removeItem('test');
+            document.getElementById('sessionStorage').textContent = val === '456' ? '✅ Funciona' : '❌ No funciona';
+        } catch (e) {
+            document.getElementById('sessionStorage').textContent = '❌ Bloqueado: ' + e.message;
+        }
+        
+        // Test API
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">⏳ Probando conexión...</div>';
+            
+            try {
+                const response = await fetch('/api/auth/usuarios');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="result success">✅ API funciona<br>Usuarios encontrados: ${data.length}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">⚠️ API responde pero con error: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
