@@ -26,6 +26,34 @@
         translate: no;
       }
     </style>
+    <script>
+      // Detectar si Chrome está traduciendo y prevenir pérdida de sesión
+      (function() {
+        // Guardar sesión antes de cualquier recarga
+        window.addEventListener('beforeunload', function() {
+          var token = localStorage.getItem('token');
+          var user = localStorage.getItem('user');
+          if (token && user) {
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('user', user);
+            sessionStorage.setItem('backup', 'true');
+          }
+        });
+        
+        // Restaurar sesión después de recarga
+        window.addEventListener('load', function() {
+          if (sessionStorage.getItem('backup') === 'true') {
+            var token = sessionStorage.getItem('token');
+            var user = sessionStorage.getItem('user');
+            if (token && user && !localStorage.getItem('token')) {
+              localStorage.setItem('token', token);
+              localStorage.setItem('user', user);
+            }
+            sessionStorage.removeItem('backup');
+          }
+        });
+      })();
+    </script>
   </head>
   <body translate="no" class="notranslate">
     <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
