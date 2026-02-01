@@ -116,7 +116,7 @@ function CambiarPassword({ user, onLogout }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <div className="form-group">
               <label>Contraseña Actual *</label>
               <input
@@ -125,7 +125,8 @@ function CambiarPassword({ user, onLogout }) {
                 onChange={(e) => setPasswordActual(e.target.value)}
                 required
                 placeholder="Ingresa tu contraseña actual"
-                autoComplete="current-password"
+                autoComplete="off"
+                name="password-actual"
               />
             </div>
 
@@ -138,7 +139,8 @@ function CambiarPassword({ user, onLogout }) {
                 required
                 minLength="6"
                 placeholder="Mínimo 6 caracteres"
-                autoComplete="new-password"
+                autoComplete="off"
+                name="password-nueva"
               />
             </div>
 
@@ -151,7 +153,8 @@ function CambiarPassword({ user, onLogout }) {
                 required
                 minLength="6"
                 placeholder="Repite la nueva contraseña"
-                autoComplete="new-password"
+                autoComplete="off"
+                name="password-confirmar"
               />
             </div>
 

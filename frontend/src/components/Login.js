@@ -60,7 +60,7 @@ function Login({ onLogin }) {
             <p>Cargando usuarios...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <div className="form-group">
               <label>Selecciona tu usuario</label>
               <select
@@ -68,6 +68,7 @@ function Login({ onLogin }) {
                 onChange={(e) => setSelectedUser(e.target.value)}
                 required
                 autoFocus
+                autoComplete="off"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -94,6 +95,8 @@ function Login({ onLogin }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Ingresa tu contraseña"
+                autoComplete="off"
+                name="user-password"
               />
             </div>
             
