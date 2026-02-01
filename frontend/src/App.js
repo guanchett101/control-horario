@@ -129,7 +129,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <div className="App notranslate" translate="no" style={{ touchAction: 'manipulation' }}>
+        <div className="App notranslate" translate="no" lang="es" style={{ touchAction: 'manipulation' }}>
           <Routes>
             <Route
               path="/login"
