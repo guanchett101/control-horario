@@ -91,6 +91,10 @@ module.exports = async (req, res) => {
     if (req.method === 'POST' && path === '/cambiar-password') {
       const { userId, passwordActual, passwordNueva } = req.body;
 
+      if (!userId) {
+        return res.status(400).json({ error: 'ID de usuario no proporcionado' });
+      }
+
       // Obtener usuario actual
       const { data: usuario, error: userError } = await supabase
         .from('usuarios')
@@ -99,13 +103,13 @@ module.exports = async (req, res) => {
         .single();
 
       if (userError || !usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+        return res.status(404).json({ error: 'Usuario no encontrado. Cierra sesión y vuelve a entrar.' });
       }
 
       // Verificar contraseña actual
       const isMatch = await bcrypt.compare(passwordActual, usuario.password_hash);
       if (!isMatch) {
-        return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+        return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
       }
 
       // Actualizar con nueva contraseña

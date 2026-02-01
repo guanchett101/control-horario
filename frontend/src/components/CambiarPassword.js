@@ -17,7 +17,7 @@ function CambiarPassword({ user, onLogout }) {
     setMensaje('');
     setError('');
 
-    // Validaciones
+    // Validaciones simples
     if (passwordNueva.length < 6) {
       setError('La nueva contraseña debe tener al menos 6 caracteres');
       return;
@@ -36,10 +36,17 @@ function CambiarPassword({ user, onLogout }) {
     setLoading(true);
 
     try {
+      // Usar el ID del usuario que viene en el objeto user
+      const userId = user.id;
+      
+      if (!userId) {
+        throw new Error('No se pudo identificar el usuario. Por favor, cierra sesión y vuelve a entrar.');
+      }
+
       await axios.post(`${API_URL}/auth/cambiar-password`, {
-        userId: user.id,
-        passwordActual,
-        passwordNueva
+        userId: userId,
+        passwordActual: passwordActual,
+        passwordNueva: passwordNueva
       });
 
       setMensaje('✅ Contraseña cambiada exitosamente');
@@ -51,7 +58,8 @@ function CambiarPassword({ user, onLogout }) {
         setMensaje('');
       }, 5000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al cambiar contraseña');
+      const errorMsg = err.response?.data?.error || err.message || 'Error al cambiar contraseña';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -82,7 +90,7 @@ function CambiarPassword({ user, onLogout }) {
               👤 <strong>{user.nombre} {user.apellido}</strong>
             </div>
             <div style={{ fontSize: '0.85rem', color: '#3b82f6', marginTop: '0.25rem' }}>
-              Usuario: {user.username || 'N/A'}
+              Rol: {user.rol === 'admin' ? 'Administrador' : 'Empleado'}
             </div>
           </div>
 
@@ -126,8 +134,11 @@ function CambiarPassword({ user, onLogout }) {
                 required
                 placeholder="Ingresa tu contraseña actual"
                 autoComplete="off"
-                name="password-actual"
+                name="current-pass"
               />
+              <small style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                Si eres nuevo, tu contraseña es: <strong>123456</strong>
+              </small>
             </div>
 
             <div className="form-group">
@@ -140,7 +151,7 @@ function CambiarPassword({ user, onLogout }) {
                 minLength="6"
                 placeholder="Mínimo 6 caracteres"
                 autoComplete="off"
-                name="password-nueva"
+                name="new-pass"
               />
             </div>
 
@@ -154,7 +165,7 @@ function CambiarPassword({ user, onLogout }) {
                 minLength="6"
                 placeholder="Repite la nueva contraseña"
                 autoComplete="off"
-                name="password-confirmar"
+                name="confirm-pass"
               />
             </div>
 
@@ -176,7 +187,7 @@ function CambiarPassword({ user, onLogout }) {
             border: '1px solid #e5e7eb'
           }}>
             <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', fontWeight: '600', color: '#111827' }}>
-              💡 Consejos de seguridad
+              💡 Consejos
             </h4>
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#4b5563', fontSize: '0.85rem', lineHeight: '1.8' }}>
               <li>Usa al menos 6 caracteres</li>
