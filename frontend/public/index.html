@@ -85,9 +85,16 @@
 </head>
 
 <body translate="no" class="notranslate">
-  <!-- Texto oculto para forzar detección de idioma ES y evitar prompt de traducción -->
-  <div style="position:absolute; top:-9999px; left:-9999px;">
-    Sistema de gestión de horarios y personal. Configuración de asistencia. Panel de control administrativo.
+  <!-- Gancho de idioma: Texto visible para el navegador pero invisible para el usuario (opacidad casi 0) -->
+  <div
+    style="position:fixed; bottom:0; left:0; width:100%; height:1px; opacity:0.01; overflow:hidden; pointer-events:none; z-index:-1; color:#000; background:#fff;">
+    <p>
+      Este es un sistema de control de horarios y asistencia para empleados en español.
+      Por favor no traducir esta página. La configuración regional es España o Latinoamérica.
+      Gestión de personal, reportes de horas, administración de empresas y usuarios.
+      Panel de control, inicio de sesión, registro de entrada y salida laboral.
+      Hoy es un buen día para trabajar. Calendario laboral y festivos.
+    </p>
   </div>
   <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
 
