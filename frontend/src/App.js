@@ -8,6 +8,43 @@ import Reportes from './components/Reportes';
 import CambiarPassword from './components/CambiarPassword';
 import './App.css';
 
+// Componente para capturar errores fatales (White Screen of Death)
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error capturado por Boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', color: 'red', textAlign: 'center' }}>
+          <h1>⚠️ Algo salió mal</h1>
+          <p>Por favor recarga la página.</p>
+          <pre style={{ textAlign: 'left', background: '#eee', padding: '10px', overflow: 'scroll' }}>
+            {this.state.error?.toString()}
+          </pre>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px' }}
+          >
+            Recargar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +56,6 @@ function App() {
     // 2. Carga simple y directa
     const loadSession = () => {
       try {
-        // En móviles, a veces localStorage es inestable, probamos sessionStorage primero si es Chrome Mobile
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
         let token = localStorage.getItem('token');
@@ -39,7 +75,7 @@ function App() {
       } catch (e) {
         console.error('Session load error', e);
       } finally {
-        // En móviles damos un poco más de tiempo
+        // Delay para asegurar que Chrome móvil no se atragante con el render inicial
         setTimeout(() => setLoading(false), 500);
       }
     };
@@ -91,36 +127,38 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App notranslate" translate="no" style={{ touchAction: 'manipulation' }}>
-        <Routes>
-          <Route
-            path="/login"
-            element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/"
-            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/registro"
-            element={user ? <RegistroHorario user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/empleados"
-            element={user ? <Empleados user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/reportes"
-            element={user ? <Reportes user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/cambiar-password"
-            element={user ? <CambiarPassword user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
-          />
-        </Routes>
-      </div>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <div className="App notranslate" translate="no" style={{ touchAction: 'manipulation' }}>
+          <Routes>
+            <Route
+              path="/login"
+              element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/"
+              element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/registro"
+              element={user ? <RegistroHorario user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/empleados"
+              element={user ? <Empleados user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/reportes"
+              element={user ? <Reportes user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/cambiar-password"
+              element={user ? <CambiarPassword user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+          </Routes>
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
