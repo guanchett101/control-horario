@@ -18,30 +18,44 @@ function Login({ onLogin }) {
 
   const cargarUsuarios = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/usuarios`);
-      setUsuarios(response.data);
+      const response = await axios.get(`${API_URL}/auth/usuarios`, {
+        timeout: 10000 // 10 segundos de timeout
+      });
+      setUsuarios(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
-      setError('Error al cargar usuarios');
+      setError('Error de conexión. Verifica tu internet o recarga la página.');
     } finally {
       setLoadingUsers(false);
     }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (!selectedUser || loading) return;
+
     setError('');
     setLoading(true);
 
     try {
+      // Forzar un guardado temporal en sessionStorage para prevenir pérdida en redirección
+      try {
+        sessionStorage.setItem('pending_user', selectedUser);
+      } catch (e) { }
+
       const response = await axios.post(`${API_URL}/auth/login`, {
         username: selectedUser,
         password
-      });
+      }, { timeout: 15000 });
 
       onLogin(response.data.user, response.data.token);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      console.error('Login error:', err);
+      const msg = err.response?.data?.error || 'Error de conexión con el servidor';
+      setError(msg);
+
+      // Limpiar password si falla
+      setPassword('');
     } finally {
       setLoading(false);
     }
@@ -52,11 +66,11 @@ function Login({ onLogin }) {
       <div className="login-card">
         <h2>Control de Horarios</h2>
         <p className="subtitle">Iniciar Sesión</p>
-        
+
         {error && <div className="alert alert-error">{error}</div>}
-        
+
         {loadingUsers ? (
-          <div style={{textAlign: 'center', padding: '2rem'}}>
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
             <p>Cargando usuarios...</p>
           </div>
         ) : (
@@ -67,7 +81,6 @@ function Login({ onLogin }) {
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
                 required
-                autoFocus
                 autoComplete="off"
                 style={{
                   width: '100%',
@@ -86,7 +99,7 @@ function Login({ onLogin }) {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label>Contraseña</label>
               <input
@@ -99,7 +112,7 @@ function Login({ onLogin }) {
                 name="user-password"
               />
             </div>
-            
+
             <button type="submit" className="btn btn-primary btn-block" disabled={loading || !selectedUser}>
               {loading ? 'Iniciando...' : 'Iniciar Sesión'}
             </button>

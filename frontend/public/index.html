@@ -1,62 +1,94 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-    <meta name="theme-color" content="#1e3c72" />
-    <meta name="description" content="Sistema de Control de Horarios - Gestión de asistencia de empleados" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="google" content="notranslate" />
-    <meta http-equiv="Content-Language" content="es" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Control de Horarios</title>
-    <style>
-      /* Prevenir zoom en inputs en iOS */
-      @supports (-webkit-touch-callout: none) {
-        input, select, textarea {
-          font-size: 16px !important;
-        }
+<html lang="es" class="notranslate" translate="no">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+  <meta name="theme-color" content="#1e3c72" />
+  <meta name="description" content="Sistema de Control de Horarios - Gestión de asistencia de empleados" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Content-Language" content="es" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <title>Control de Horarios</title>
+  <!-- Anti-cache para evitar versiones bugeadas en móviles -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    /* Prevenir zoom en inputs en iOS */
+    @supports (-webkit-touch-callout: none) {
+
+      input,
+      select,
+      textarea {
+        font-size: 16px !important;
       }
-      /* Prevenir traducción automática */
-      body {
-        translate: no;
-      }
-    </style>
-    <script>
-      // Detectar si Chrome está traduciendo y prevenir pérdida de sesión
-      (function() {
-        // Guardar sesión antes de cualquier recarga
-        window.addEventListener('beforeunload', function() {
-          var token = localStorage.getItem('token');
-          var user = localStorage.getItem('user');
-          if (token && user) {
-            sessionStorage.setItem('token', token);
-            sessionStorage.setItem('user', user);
-            sessionStorage.setItem('backup', 'true');
+    }
+
+    /* Prevenir traducción automática y asegurar visibilidad */
+    body {
+      translate: no;
+      min-height: 100vh;
+      background: #f8f9fa;
+    }
+  </style>
+  <script>
+    // Blindaje de almacenamiento y sesión para móviles (Chrome Fix)
+    (function () {
+      try {
+        var storageCheck = function (type) {
+          try {
+            var s = window[type], x = '__storage_test__';
+            s.setItem(x, x);
+            s.removeItem(x);
+            return true;
+          } catch (e) { return false; }
+        };
+
+        var hasLocal = storageCheck('localStorage');
+        var hasSession = storageCheck('sessionStorage');
+
+        window.addEventListener('beforeunload', function () {
+          if (hasLocal && hasSession) {
+            try {
+              var token = localStorage.getItem('token');
+              var user = localStorage.getItem('user');
+              if (token && user) {
+                sessionStorage.setItem('token_backup', token);
+                sessionStorage.setItem('user_backup', user);
+              }
+            } catch (e) { }
           }
         });
-        
-        // Restaurar sesión después de recarga
-        window.addEventListener('load', function() {
-          if (sessionStorage.getItem('backup') === 'true') {
-            var token = sessionStorage.getItem('token');
-            var user = sessionStorage.getItem('user');
-            if (token && user && !localStorage.getItem('token')) {
-              localStorage.setItem('token', token);
-              localStorage.setItem('user', user);
+
+        if (hasLocal && hasSession) {
+          try {
+            var t = sessionStorage.getItem('token_backup');
+            var u = sessionStorage.getItem('user_backup');
+            if (t && u && !localStorage.getItem('token')) {
+              localStorage.setItem('token', t);
+              localStorage.setItem('user', u);
             }
-            sessionStorage.removeItem('backup');
-          }
-        });
-      })();
-    </script>
-  </head>
-  <body translate="no" class="notranslate">
-    <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
-    <div id="root"></div>
-  </body>
+          } catch (e) { }
+        }
+      } catch (err) {
+        console.warn('Storage script bypassed');
+      }
+    })();
+  </script>
+</head>
+
+<body translate="no" class="notranslate">
+  <!-- Texto oculto para forzar detección de idioma correcto por Chrome -->
+  <span style="display:none" aria-hidden="true">Sistema de control de horarios y asistencia para empleados.</span>
+  <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
+  <div id="root"></div>
+</body>
+
 </html>

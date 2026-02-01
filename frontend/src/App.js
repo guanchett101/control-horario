@@ -13,66 +13,55 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      // Detectar Chrome móvil
-      const isChromeMobile = /Chrome/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
-      
-      if (isChromeMobile) {
-        console.log('Chrome móvil detectado - usando sessionStorage');
-      }
+    // 1. Limpieza de Service Workers
+    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(sw => sw.unregister()));
 
-      // Intentar cargar desde localStorage primero
-      let token = localStorage.getItem('token');
-      let userData = localStorage.getItem('user');
-      
-      // Si no hay en localStorage, intentar sessionStorage (para Chrome móvil)
-      if (!token && isChromeMobile) {
-        token = sessionStorage.getItem('token');
-        userData = sessionStorage.getItem('user');
-      }
+    // 2. Carga simple y directa
+    const loadSession = () => {
+      try {
+        // En móviles, a veces localStorage es inestable, probamos sessionStorage primero si es Chrome Mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-      if (token && userData) {
-        const parsedUser = JSON.parse(userData);
-        // Validar que el usuario tenga los campos necesarios
-        if (parsedUser && parsedUser.id && parsedUser.nombre) {
-          setUser(parsedUser);
-        } else {
-          // Si los datos están corruptos, limpiar
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          sessionStorage.removeItem('token');
-          sessionStorage.removeItem('user');
+        let token = localStorage.getItem('token');
+        let userStr = localStorage.getItem('user');
+
+        if (isMobile && (!token || !userStr)) {
+          token = sessionStorage.getItem('token');
+          userStr = sessionStorage.getItem('user');
         }
+
+        if (token && userStr) {
+          const userData = JSON.parse(userStr);
+          if (userData?.id) {
+            setUser(userData);
+          }
+        }
+      } catch (e) {
+        console.error('Session load error', e);
+      } finally {
+        // En móviles damos un poco más de tiempo
+        setTimeout(() => setLoading(false), 500);
       }
-    } catch (error) {
-      console.error('Error al cargar usuario:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('user');
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadSession();
   }, []);
 
   const handleLogin = (userData, token) => {
+    // Guardado redundante para asegurar persistencia
     try {
-      const isChromeMobile = /Chrome/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
-      
-      // Guardar en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
-      
-      // También guardar en sessionStorage para Chrome móvil
-      if (isChromeMobile) {
-        sessionStorage.setItem('token', token);
-        sessionStorage.setItem('user', JSON.stringify(userData));
-      }
-      
-      setUser(userData);
-    } catch (error) {
-      console.error('Error al guardar sesión:', error);
-      alert('Error al iniciar sesión. Por favor, intenta de nuevo.');
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
+    } catch (e) { }
+
+    // Actualizar estado
+    setUser(userData);
+
+    // Forzar navegación limpia en móviles
+    if (/Android|iPhone/i.test(navigator.userAgent)) {
+      setTimeout(() => window.location.reload(), 100);
     }
   };
 
@@ -105,29 +94,29 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route 
-            path="/login" 
-            element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} 
+          <Route
+            path="/login"
+            element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />}
           />
-          <Route 
-            path="/" 
-            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          <Route
+            path="/"
+            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/registro" 
-            element={user ? <RegistroHorario user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          <Route
+            path="/registro"
+            element={user ? <RegistroHorario user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/empleados" 
-            element={user ? <Empleados user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          <Route
+            path="/empleados"
+            element={user ? <Empleados user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/reportes" 
-            element={user ? <Reportes user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          <Route
+            path="/reportes"
+            element={user ? <Reportes user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/cambiar-password" 
-            element={user ? <CambiarPassword user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          <Route
+            path="/cambiar-password"
+            element={user ? <CambiarPassword user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>

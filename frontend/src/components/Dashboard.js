@@ -7,34 +7,47 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function Dashboard({ user, onLogout }) {
   const [registrosHoy, setRegistrosHoy] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [horaActual, setHoraActual] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
+  const [datosListos, setDatosListos] = useState(false);
 
   useEffect(() => {
     // Detectar si es móvil
     const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setIsMobile(checkMobile);
-    
-    cargarRegistrosHoy();
+
+    // Marcar que el componente está listo
+    setDatosListos(true);
+
+    // Reloj
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
-    return () => clearInterval(interval);
+
+    // Cargar registros después de 500ms (dar tiempo a que se renderice)
+    const timeout = setTimeout(() => {
+      cargarRegistrosHoy();
+    }, 500);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, []);
 
   const cargarRegistrosHoy = async () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      
+
       // Timeout de 10 segundos para móviles lentos
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
+
       const response = await axios.get(`${API_URL}/registros/hoy`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
       setRegistrosHoy(Array.isArray(response.data) ? response.data : []);
       setError(null);
@@ -56,20 +69,25 @@ function Dashboard({ user, onLogout }) {
   const empleadosSalieron = registrosHoy.filter(r => r.hora_salida).length;
 
   const formatearHora = (fecha) => {
-    return fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    // Formato manual simple: HH:MM:SS
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${pad(fecha.getHours())}:${pad(fecha.getMinutes())}:${pad(fecha.getSeconds())}`;
   };
 
   const formatearFecha = (fecha) => {
-    return fecha.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    // Formato manual simple: Día DD de Mes de AAAA
+    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return `${dias[fecha.getDay()]}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   };
 
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
-      
+
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {/* Header con reloj */}
-        <div style={{ 
+        <div style={{
           background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
           borderRadius: '8px',
           padding: '2rem',
@@ -113,7 +131,7 @@ function Dashboard({ user, onLogout }) {
             gap: '1rem'
           }}>
             <span>⚠️ {error}</span>
-            <button 
+            <button
               onClick={() => {
                 setLoading(true);
                 setError(null);
@@ -134,9 +152,9 @@ function Dashboard({ user, onLogout }) {
           </div>
         )}
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '1.25rem',
           marginBottom: '2rem'
         }}>
@@ -262,14 +280,14 @@ function Dashboard({ user, onLogout }) {
               transition: 'all 0.2s',
               boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 60, 114, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
-            }}>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 60, 114, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
+              }}>
               <span style={{ fontSize: '1.75rem' }}>⏰</span>
               <div>
                 <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Registrar Horario</div>
@@ -291,14 +309,14 @@ function Dashboard({ user, onLogout }) {
                   transition: 'all 0.2s',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
-                }}>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
+                  }}>
                   <span style={{ fontSize: '1.75rem' }}>👥</span>
                   <div>
                     <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Empleados</div>
@@ -318,14 +336,14 @@ function Dashboard({ user, onLogout }) {
                   transition: 'all 0.2s',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
-                }}>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
+                  }}>
                   <span style={{ fontSize: '1.75rem' }}>📊</span>
                   <div>
                     <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Reportes</div>
@@ -348,7 +366,7 @@ function Dashboard({ user, onLogout }) {
           <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
             Actividad de Hoy
           </h3>
-          
+
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
               <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
@@ -397,7 +415,7 @@ function Dashboard({ user, onLogout }) {
                       )}
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', gap: isMobile ? '1rem' : '2rem', alignItems: 'center', fontSize: isMobile ? '0.85rem' : '1rem' }}>
                     <div>
                       <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
