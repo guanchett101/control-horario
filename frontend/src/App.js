@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import RegistroHorario from './components/RegistroHorario';
 import Empleados from './components/Empleados';
 import Reportes from './components/Reportes';
+import CambiarPassword from './components/CambiarPassword';
 import './App.css';
 
 function App() {
@@ -53,6 +54,10 @@ function App() {
           <Route 
             path="/reportes" 
             element={user ? <Reportes user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/cambiar-password" 
+            element={user ? <CambiarPassword user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
           />
         </Routes>
       </div>

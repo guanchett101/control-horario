@@ -60,7 +60,8 @@ module.exports = async (req, res) => {
           empleadoId: data.empleado_id,
           nombre: data.empleados.nombre,
           apellido: data.empleados.apellido,
-          rol: data.rol
+          rol: data.rol,
+          username: data.username
         }
       });
     }
@@ -84,6 +85,39 @@ module.exports = async (req, res) => {
 
       if (error) throw error;
       return res.status(201).json({ message: 'Usuario creado exitosamente', id: data[0].id });
+    }
+
+    // Cambiar contraseña
+    if (req.method === 'POST' && path === '/cambiar-password') {
+      const { userId, passwordActual, passwordNueva } = req.body;
+
+      // Obtener usuario actual
+      const { data: usuario, error: userError } = await supabase
+        .from('usuarios')
+        .select('password_hash')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      // Verificar contraseña actual
+      const isMatch = await bcrypt.compare(passwordActual, usuario.password_hash);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+      }
+
+      // Actualizar con nueva contraseña
+      const nuevoHash = await bcrypt.hash(passwordNueva, 10);
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ password_hash: nuevoHash })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+
+      return res.json({ message: 'Contraseña actualizada exitosamente' });
     }
 
     // Obtener lista de usuarios

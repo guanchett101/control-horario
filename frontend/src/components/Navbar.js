@@ -14,6 +14,7 @@ function Navbar({ user, onLogout }) {
             <Link to="/reportes">Reportes</Link>
           </>
         )}
+        <Link to="/cambiar-password">🔐 Contraseña</Link>
         <span style={{marginLeft: '1rem'}}>{user.nombre}</span>
         <button onClick={onLogout} className="btn btn-logout">Salir</button>
       </div>
