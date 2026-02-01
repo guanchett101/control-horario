@@ -14,7 +14,9 @@ function Empleados({ user, onLogout }) {
     email: '',
     telefono: '',
     cargo: '',
-    fechaIngreso: new Date().toISOString().split('T')[0]
+    fechaIngreso: new Date().toISOString().split('T')[0],
+    username: '',
+    password: ''
   });
 
   useEffect(() => {
@@ -35,7 +37,27 @@ function Empleados({ user, onLogout }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/empleados`, formData);
+      // Crear empleado
+      const empleadoResponse = await axios.post(`${API_URL}/empleados`, {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        telefono: formData.telefono,
+        cargo: formData.cargo,
+        fechaIngreso: formData.fechaIngreso
+      });
+
+      // Crear usuario para el empleado
+      if (formData.username && formData.password) {
+        await axios.post(`${API_URL}/auth/register`, {
+          empleadoId: empleadoResponse.data.id,
+          username: formData.username,
+          password: formData.password,
+          rol: 'empleado'
+        });
+      }
+
+      alert('Empleado y usuario creados exitosamente');
       setShowForm(false);
       setFormData({
         nombre: '',
@@ -43,11 +65,13 @@ function Empleados({ user, onLogout }) {
         email: '',
         telefono: '',
         cargo: '',
-        fechaIngreso: new Date().toISOString().split('T')[0]
+        fechaIngreso: new Date().toISOString().split('T')[0],
+        username: '',
+        password: ''
       });
       cargarEmpleados();
     } catch (error) {
-      alert('Error al crear empleado');
+      alert('Error al crear empleado: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -137,8 +161,36 @@ function Empleados({ user, onLogout }) {
                   required
                 />
               </div>
+
+              <hr style={{margin: '1.5rem 0'}} />
+              <h4>Credenciales de Acceso</h4>
               
-              <button type="submit" className="btn btn-success">Guardar</button>
+              <div className="form-group">
+                <label>Usuario (para login)</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Ej: juan.perez"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Mínimo 6 caracteres"
+                  minLength="6"
+                  required
+                />
+              </div>
+              
+              <button type="submit" className="btn btn-success">Guardar Empleado y Usuario</button>
             </form>
           </div>
         )}
