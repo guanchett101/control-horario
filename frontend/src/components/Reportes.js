@@ -19,7 +19,7 @@ function Reportes({ user, onLogout }) {
     const hoy = new Date();
     const haceUnMes = new Date();
     haceUnMes.setMonth(haceUnMes.getMonth() - 1);
-    
+
     setFechaFin(hoy.toISOString().split('T')[0]);
     setFechaInicio(haceUnMes.toISOString().split('T')[0]);
   }, []);
@@ -41,7 +41,7 @@ function Reportes({ user, onLogout }) {
       alert('Por favor selecciona un empleado');
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -102,10 +102,10 @@ function Reportes({ user, onLogout }) {
 
     const empleado = empleados.find(e => e.id === parseInt(empleadoId));
     const nombreEmpleado = empleado ? `${empleado.nombre}_${empleado.apellido}` : 'empleado';
-    
+
     // Crear encabezados
     let csv = 'Fecha,Empleado,Cargo,Entrada,Salida,Horas Trabajadas\n';
-    
+
     // Agregar datos
     registros.forEach(reg => {
       const fecha = new Date(reg.fecha).toLocaleDateString('es-ES');
@@ -114,7 +114,7 @@ function Reportes({ user, onLogout }) {
       const entrada = reg.hora_entrada || '-';
       const salida = reg.hora_salida || '-';
       const horas = calcularHoras(reg.hora_entrada, reg.hora_salida).texto;
-      
+
       csv += `${fecha},"${nombre}","${cargo}",${entrada},${salida},${horas}\n`;
     });
 
@@ -146,7 +146,7 @@ function Reportes({ user, onLogout }) {
 
     const empleado = empleados.find(e => e.id === parseInt(empleadoId));
     const nombreEmpleado = empleado ? `${empleado.nombre}_${empleado.apellido}` : 'empleado';
-    
+
     // Crear HTML para Excel
     let html = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
@@ -185,7 +185,7 @@ function Reportes({ user, onLogout }) {
       const entrada = reg.hora_entrada || '-';
       const salida = reg.hora_salida || '-';
       const horas = calcularHoras(reg.hora_entrada, reg.hora_salida).texto;
-      
+
       html += `
         <tr>
           <td>${fecha}</td>
@@ -246,10 +246,10 @@ function Reportes({ user, onLogout }) {
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
-      
+
       <div className="container">
         <h2 style={{ marginBottom: '2rem', color: '#111827' }}>📊 Reportes de Horarios</h2>
-        
+
         <div style={{
           background: 'white',
           borderRadius: '8px',
@@ -288,8 +288,8 @@ function Reportes({ user, onLogout }) {
                 </select>
               )}
             </div>
-            
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem'}}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div className="form-group">
                 <label>Fecha Inicio</label>
                 <input
@@ -299,7 +299,7 @@ function Reportes({ user, onLogout }) {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Fecha Fin</label>
                 <input
@@ -310,7 +310,7 @@ function Reportes({ user, onLogout }) {
                 />
               </div>
             </div>
-            
+
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? '🔍 Buscando...' : '🔍 Buscar Registros'}
             </button>
@@ -400,14 +400,14 @@ function Reportes({ user, onLogout }) {
                 Exportar Reporte
               </h3>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <button 
+                <button
                   onClick={exportarExcel}
                   className="btn btn-success"
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   📊 Exportar a Excel
                 </button>
-                <button 
+                <button
                   onClick={exportarCSV}
                   className="btn btn-primary"
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -428,7 +428,7 @@ function Reportes({ user, onLogout }) {
               <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
                 Detalle de Registros ({registros.length})
               </h3>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="table-responsive">
                 <table className="table">
                   <thead>
                     <tr>

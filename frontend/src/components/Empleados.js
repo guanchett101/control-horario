@@ -36,7 +36,7 @@ function Empleados({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       if (editando) {
         // Actualizar empleado existente
@@ -138,12 +138,12 @@ function Empleados({ user, onLogout }) {
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
-      
+
       <div className="container">
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h2 style={{ color: '#111827' }}>👥 Gestión de Empleados</h2>
-          <button 
-            onClick={() => showForm ? cancelar() : setShowForm(true)} 
+          <button
+            onClick={() => showForm ? cancelar() : setShowForm(true)}
             className="btn btn-primary"
           >
             {showForm ? 'Cancelar' : '+ Nuevo Empleado'}
@@ -174,7 +174,7 @@ function Empleados({ user, onLogout }) {
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Apellido *</label>
                   <input
@@ -197,7 +197,7 @@ function Empleados({ user, onLogout }) {
                     onChange={handleChange}
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Teléfono</label>
                   <input
@@ -220,7 +220,7 @@ function Empleados({ user, onLogout }) {
                     required
                   />
                 </div>
-                
+
                 {!editando && (
                   <div className="form-group">
                     <label>Fecha de Ingreso *</label>
@@ -237,11 +237,11 @@ function Empleados({ user, onLogout }) {
 
               {!editando && (
                 <>
-                  <hr style={{margin: '1.5rem 0', border: 'none', borderTop: '1px solid #e5e7eb'}} />
+                  <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #e5e7eb' }} />
                   <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '600', color: '#111827' }}>
                     🔐 Credenciales de Acceso
                   </h4>
-                  
+
                   <div className="form-group">
                     <label>Usuario (para login) *</label>
                     <input
@@ -270,7 +270,7 @@ function Empleados({ user, onLogout }) {
                   </div>
                 </>
               )}
-              
+
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
                 <button type="submit" className="btn btn-success">
                   {editando ? '💾 Guardar Cambios' : '✅ Crear Empleado'}
@@ -293,7 +293,7 @@ function Empleados({ user, onLogout }) {
           <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
             Lista de Empleados ({empleados.length})
           </h3>
-          
+
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
               Cargando...
@@ -304,7 +304,7 @@ function Empleados({ user, onLogout }) {
               No hay empleados registrados
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-responsive">
               <table className="table">
                 <thead>
                   <tr>

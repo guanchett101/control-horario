@@ -378,7 +378,7 @@ function Dashboard({ user, onLogout }) {
               <p style={{ margin: 0 }}>No hay registros para hoy</p>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-responsive">
               {registrosHoy.slice(0, isMobile ? 5 : registrosHoy.length).map((registro) => (
                 <div key={registro.id} style={{
                   display: 'flex',
