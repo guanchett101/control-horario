@@ -67,13 +67,18 @@
             // Limpiar sessionStorage también
             sessionStorage.clear();
             
-            // Mostrar mensaje
-            document.getElementById('message').innerHTML = '<div class="success">✅ Sesión cerrada</div>';
+            // Limpiar cookies si existen
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
             
-            // Redirigir al login después de 1 segundo
+            // Mostrar mensaje
+            document.getElementById('message').innerHTML = '<div class="success">✅ Sesión cerrada<br><small>Redirigiendo...</small></div>';
+            
+            // Redirigir al login después de 1.5 segundos
             setTimeout(function() {
                 window.location.href = '/';
-            }, 1000);
+            }, 1500);
         }
         
         // Auto-ejecutar al cargar la página

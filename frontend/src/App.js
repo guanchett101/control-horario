@@ -14,8 +14,23 @@ function App() {
 
   useEffect(() => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('user');
+      // Detectar Chrome móvil
+      const isChromeMobile = /Chrome/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
+      
+      if (isChromeMobile) {
+        console.log('Chrome móvil detectado - usando sessionStorage');
+      }
+
+      // Intentar cargar desde localStorage primero
+      let token = localStorage.getItem('token');
+      let userData = localStorage.getItem('user');
+      
+      // Si no hay en localStorage, intentar sessionStorage (para Chrome móvil)
+      if (!token && isChromeMobile) {
+        token = sessionStorage.getItem('token');
+        userData = sessionStorage.getItem('user');
+      }
+
       if (token && userData) {
         const parsedUser = JSON.parse(userData);
         // Validar que el usuario tenga los campos necesarios
@@ -25,12 +40,16 @@ function App() {
           // Si los datos están corruptos, limpiar
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
         }
       }
     } catch (error) {
       console.error('Error al cargar usuario:', error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
     } finally {
       setLoading(false);
     }
@@ -38,8 +57,18 @@ function App() {
 
   const handleLogin = (userData, token) => {
     try {
+      const isChromeMobile = /Chrome/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
+      
+      // Guardar en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // También guardar en sessionStorage para Chrome móvil
+      if (isChromeMobile) {
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('user', JSON.stringify(userData));
+      }
+      
       setUser(userData);
     } catch (error) {
       console.error('Error al guardar sesión:', error);
@@ -50,6 +79,8 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     setUser(null);
   };
 
