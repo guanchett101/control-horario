@@ -8,6 +8,7 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 function Dashboard({ user, onLogout }) {
   const [registrosHoy, setRegistrosHoy] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [horaActual, setHoraActual] = useState(new Date());
 
   useEffect(() => {
@@ -22,10 +23,11 @@ function Dashboard({ user, onLogout }) {
       const response = await axios.get(`${API_URL}/registros/hoy`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      setRegistrosHoy(response.data || []);
+      setRegistrosHoy(Array.isArray(response.data) ? response.data : []);
+      setError(null);
     } catch (error) {
       console.error('Error al cargar registros:', error);
-      // Si hay error de autenticación, no hacer nada (el usuario sigue logueado)
+      setError('No se pudieron cargar los registros');
       setRegistrosHoy([]);
     } finally {
       setLoading(false);
@@ -61,7 +63,7 @@ function Dashboard({ user, onLogout }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: '600' }}>
-                Hola, {user.nombre}
+                Hola, {user?.nombre || 'Usuario'}
               </h1>
               <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem' }}>
                 {formatearFecha(horaActual)}
@@ -72,13 +74,26 @@ function Dashboard({ user, onLogout }) {
                 {formatearHora(horaActual)}
               </div>
               <div style={{ fontSize: '0.875rem', opacity: 0.9, marginTop: '0.5rem' }}>
-                {user.rol === 'admin' ? 'Administrador' : 'Empleado'}
+                {user?.rol === 'admin' ? 'Administrador' : 'Empleado'}
               </div>
             </div>
           </div>
         </div>
 
         {/* Estadísticas */}
+        {error && (
+          <div style={{
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            color: '#991b1b'
+          }}>
+            ⚠️ {error} - Mostrando datos en caché
+          </div>
+        )}
+
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
@@ -222,7 +237,7 @@ function Dashboard({ user, onLogout }) {
               </div>
             </Link>
 
-            {user.rol === 'admin' && (
+            {user?.rol === 'admin' && (
               <>
                 <Link to="/empleados" style={{
                   textDecoration: 'none',

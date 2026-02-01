@@ -2,25 +2,42 @@
   "version": 2,
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/build",
+  "env": {
+    "REACT_APP_API_URL": "/api"
+  },
   "routes": [
     {
-      "src": "/api/auth/(.*)",
+      "src": "/api/auth/login",
       "dest": "/api/auth.js"
+    },
+    {
+      "src": "/api/auth/register",
+      "dest": "/api/auth.js"
+    },
+    {
+      "src": "/api/auth/cambiar-password",
+      "dest": "/api/auth.js"
+    },
+    {
+      "src": "/api/auth/usuarios",
+      "dest": "/api/auth.js"
+    },
+    {
+      "src": "/api/empleados",
+      "methods": ["GET", "POST"],
+      "dest": "/api/empleados.js"
     },
     {
       "src": "/api/empleados/(.*)",
       "dest": "/api/empleados.js"
     },
     {
-      "src": "/api/empleados",
-      "dest": "/api/empleados.js"
-    },
-    {
-      "src": "/api/registros/(.*)",
+      "src": "/api/registros",
+      "methods": ["GET", "POST"],
       "dest": "/api/registros.js"
     },
     {
-      "src": "/api/registros",
+      "src": "/api/registros/(.*)",
       "dest": "/api/registros.js"
     },
     {
