@@ -85,4 +85,34 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Obtener lista de usuarios (sin contraseñas)
+router.get('/usuarios', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select(`
+        username,
+        rol,
+        empleados (
+          nombre,
+          apellido
+        )
+      `)
+      .order('username', { ascending: true });
+
+    if (error) throw error;
+
+    const usuariosFormateados = data.map(u => ({
+      username: u.username,
+      nombre: u.empleados.nombre,
+      apellido: u.empleados.apellido,
+      rol: u.rol
+    }));
+
+    res.json(usuariosFormateados);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

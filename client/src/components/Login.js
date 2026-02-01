@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
 
@@ -7,8 +7,22 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [usuarios, setUsuarios] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const cargarUsuarios = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/auth/usuarios`);
+      setUsuarios(response.data);
+    } catch (err) {
+      console.error('Error al cargar usuarios:', err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +50,20 @@ function Login({ onLogin }) {
         <p className="subtitle">Iniciar Sesión</p>
         
         {error && <div className="alert alert-error">{error}</div>}
+        
+        {usuarios.length > 0 && (
+          <div className="usuarios-disponibles">
+            <p><strong>Usuarios disponibles:</strong></p>
+            <ul>
+              {usuarios.map((user) => (
+                <li key={user.username}>
+                  {user.nombre} {user.apellido} - <code>{user.username}</code>
+                  {user.rol === 'admin' && <span className="badge-admin"> (Admin)</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">

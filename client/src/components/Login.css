@@ -12,7 +12,7 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
 }
 
 .login-card h2 {
@@ -30,4 +30,46 @@
 .btn-block {
   width: 100%;
   margin-top: 1rem;
+}
+
+.usuarios-disponibles {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #3498db;
+}
+
+.usuarios-disponibles p {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.usuarios-disponibles ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.usuarios-disponibles li {
+  padding: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.usuarios-disponibles code {
+  background: #e8f4f8;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: #2980b9;
+  font-weight: 600;
+}
+
+.badge-admin {
+  background: #e74c3c;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
 }
