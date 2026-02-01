@@ -140,10 +140,15 @@ function Empleados({ user, onLogout }) {
   };
 
   return (
-    <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', overflowX: 'hidden' }}>
       <Navbar user={user} onLogout={onLogout} />
 
-      <div className="container" style={{ maxWidth: isMobile ? '100%' : '1200px', padding: isMobile ? '0.75rem' : '0 1rem' }}>
+      <div className="container" style={{ 
+        maxWidth: isMobile ? '100%' : '1200px', 
+        padding: isMobile ? '0.75rem' : '0 1rem',
+        margin: '0 auto',
+        overflowX: 'hidden'
+      }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -158,7 +163,12 @@ function Empleados({ user, onLogout }) {
           <button
             onClick={() => showForm ? cancelar() : setShowForm(true)}
             className="btn btn-primary"
-            style={{ fontSize: isMobile ? '0.85rem' : '1rem', padding: isMobile ? '0.5rem 1rem' : '0.6rem 1.2rem' }}
+            style={{ 
+              fontSize: isMobile ? '0.85rem' : '1rem', 
+              padding: isMobile ? '0.5rem 1rem' : '0.6rem 1.2rem',
+              background: '#10b981',  // VERDE para ver cambio
+              whiteSpace: 'nowrap'
+            }}
           >
             {showForm ? 'Cancelar' : isMobile ? '+ Nuevo' : '+ Nuevo Empleado'}
           </button>
@@ -171,13 +181,15 @@ function Empleados({ user, onLogout }) {
             padding: isMobile ? '1rem' : '2rem',
             marginBottom: isMobile ? '1rem' : '2rem',
             boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-            border: '1px solid #e5e7eb'
+            border: '2px solid #10b981',  // BORDE VERDE para ver cambio
+            maxWidth: '100%',
+            overflowX: 'hidden'
           }}>
-            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: '600', color: '#111827' }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: '600', color: '#10b981' }}>
               {editando ? '✏️ Editar Empleado' : '➕ Nuevo Empleado'}
             </h3>
             <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%' }}>
                 <div className="form-group">
                   <label>Nombre *</label>
                   <input
@@ -201,7 +213,7 @@ function Empleados({ user, onLogout }) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%' }}>
                 <div className="form-group">
                   <label>Email</label>
                   <input
@@ -209,6 +221,7 @@ function Empleados({ user, onLogout }) {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                   />
                 </div>
 
@@ -219,11 +232,12 @@ function Empleados({ user, onLogout }) {
                     name="telefono"
                     value={formData.telefono}
                     onChange={handleChange}
+                    style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%' }}>
                 <div className="form-group">
                   <label>Cargo *</label>
                   <input
@@ -302,9 +316,11 @@ function Empleados({ user, onLogout }) {
           borderRadius: '8px',
           padding: isMobile ? '1rem' : '2rem',
           boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e7eb'
+          border: '2px solid #ef4444',  // BORDE ROJO para ver cambio
+          maxWidth: '100%',
+          overflowX: 'hidden'
         }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.125rem', fontWeight: '600', color: '#111827' }}>
+          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1rem' : '1.125rem', fontWeight: '600', color: '#ef4444' }}>
             Lista de Empleados ({empleados.length})
           </h3>
 
@@ -319,31 +335,34 @@ function Empleados({ user, onLogout }) {
             </div>
           ) : isMobile ? (
             // Vista de tarjetas para móvil
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '100%' }}>
               {empleados.map((emp) => (
                 <div key={emp.id} style={{
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
                   padding: '1rem',
-                  background: '#f9fafb'
+                  background: '#fef3c7',  // FONDO AMARILLO para ver cambio
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
+                  overflowWrap: 'break-word'
                 }}>
                   <div style={{ marginBottom: '0.75rem' }}>
-                    <div style={{ fontWeight: '600', fontSize: '1rem', color: '#111827', marginBottom: '0.25rem' }}>
+                    <div style={{ fontWeight: '600', fontSize: '1rem', color: '#111827', marginBottom: '0.25rem', wordBreak: 'break-word' }}>
                       {emp.nombre} {emp.apellido}
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#6b7280', wordBreak: 'break-word' }}>
                       {emp.cargo}
                     </div>
                   </div>
                   
                   {(emp.email || emp.telefono) && (
-                    <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem', wordBreak: 'break-all' }}>
                       {emp.email && <div>📧 {emp.email}</div>}
                       {emp.telefono && <div>📱 {emp.telefono}</div>}
                     </div>
                   )}
                   
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%' }}>
                     <button
                       onClick={() => editarEmpleado(emp)}
                       style={{
@@ -355,7 +374,8 @@ function Empleados({ user, onLogout }) {
                         borderRadius: '6px',
                         cursor: 'pointer',
                         fontSize: '0.85rem',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        minWidth: 0
                       }}
                     >
                       ✏️ Editar
@@ -371,7 +391,8 @@ function Empleados({ user, onLogout }) {
                         borderRadius: '6px',
                         cursor: 'pointer',
                         fontSize: '0.85rem',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        minWidth: 0
                       }}
                     >
                       🗑️ Eliminar
