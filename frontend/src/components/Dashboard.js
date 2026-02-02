@@ -9,6 +9,7 @@ function Dashboard({ user, onLogout }) {
   const [registrosHoy, setRegistrosHoy] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
   const [horaActual, setHoraActual] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
 
@@ -44,8 +45,15 @@ function Dashboard({ user, onLogout }) {
       clearTimeout(timeoutId);
       setRegistrosHoy(Array.isArray(response.data) ? response.data : []);
       setError(null);
+      setDebugInfo(null);
     } catch (error) {
       console.error('Error al cargar registros:', error);
+
+      // Capturar info de debug del servidor si existe
+      if (error.response?.data) {
+        setDebugInfo(error.response.data);
+      }
+
       if (error.name === 'AbortError') {
         setError('Servidor lento: La base de datos está tardando en responder. Intenta recargar de nuevo.');
       } else if (error.response?.status === 404) {
@@ -143,9 +151,18 @@ function Dashboard({ user, onLogout }) {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <span style={{ fontSize: '1.5rem' }}>⚠️</span>
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong style={{ display: 'block' }}>{error}</strong>
-                <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Si acabas de ver este error, intenta <u>deslizar hacia abajo</u> para refrescar o pulsa el botón.</span>
+                {error.includes('configuración') && (
+                  <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                    Error del Servidor: {debugInfo?.error || 'N/A'}<br />
+                    URL: {debugInfo?.debug?.url || 'N/A'}<br />
+                    Acción: {debugInfo?.debug?.action || 'N/A'}
+                  </div>
+                )}
+                <span style={{ fontSize: '0.85rem', opacity: 0.8, display: 'block', marginTop: '0.5rem' }}>
+                  Si acabas de ver este error, intenta <u>deslizar hacia abajo</u> para refrescar.
+                </span>
               </div>
             </div>
             <button
