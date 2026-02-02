@@ -128,20 +128,26 @@ function Dashboard({ user, onLogout }) {
 
         {/* Estadísticas */}
         {error && (
-          <div style={{
-            background: '#fef2f2',
+          <div className="fade-in" style={{
+            background: 'rgba(254, 242, 242, 0.9)',
+            backdropFilter: 'blur(8px)',
             border: '1px solid #fecaca',
-            borderRadius: '8px',
-            padding: '1rem',
+            borderRadius: '16px',
+            padding: '1.25rem',
             marginBottom: '1.5rem',
             color: '#991b1b',
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
+            flexDirection: 'column',
+            gap: '1rem',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
           }}>
-            <span>⚠️ {error}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <div>
+                <strong style={{ display: 'block' }}>{error}</strong>
+                <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Si acabas de ver este error, intenta <u>deslizar hacia abajo</u> para refrescar o pulsa el botón.</span>
+              </div>
+            </div>
             <button
               onClick={() => {
                 setLoading(true);
@@ -152,13 +158,19 @@ function Dashboard({ user, onLogout }) {
                 background: '#dc2626',
                 color: 'white',
                 border: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '10px',
                 cursor: 'pointer',
-                fontSize: '0.9rem'
+                fontSize: '0.95rem',
+                fontWeight: '700',
+                transition: 'transform 0.2s',
+                width: isMobile ? '100%' : 'auto',
+                alignSelf: isMobile ? 'stretch' : 'flex-end'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              🔄 Reintentar
+              🔄 Reintentar Ahora
             </button>
           </div>
         )}
