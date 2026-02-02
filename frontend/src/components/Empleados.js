@@ -29,7 +29,7 @@ function Empleados({ user, onLogout }) {
 
   const cargarEmpleados = async () => {
     try {
-      const response = await axios.get(`${API_URL}/empleados`);
+      const response = await axios.get(`${API_URL}/empleados?action=list`);
       setEmpleados(response.data);
     } catch (error) {
       console.error('Error al cargar empleados:', error);
@@ -44,7 +44,7 @@ function Empleados({ user, onLogout }) {
     try {
       if (editando) {
         // Actualizar empleado existente
-        await axios.put(`${API_URL}/empleados/${editando}`, {
+        await axios.put(`${API_URL}/empleados?action=detail&id=${editando}`, {
           nombre: formData.nombre,
           apellido: formData.apellido,
           email: formData.email,
@@ -54,7 +54,7 @@ function Empleados({ user, onLogout }) {
         alert('✅ Empleado actualizado exitosamente');
       } else {
         // Crear nuevo empleado
-        const empleadoResponse = await axios.post(`${API_URL}/empleados`, {
+        const empleadoResponse = await axios.post(`${API_URL}/empleados?action=create`, {
           nombre: formData.nombre,
           apellido: formData.apellido,
           email: formData.email,
@@ -64,7 +64,7 @@ function Empleados({ user, onLogout }) {
         });
 
         // Crear usuario con contraseña por defecto "123456"
-        await axios.post(`${API_URL}/auth/register`, {
+        await axios.post(`${API_URL}/auth?action=register`, {
           empleadoId: empleadoResponse.data.id,
           username: formData.username,
           password: '123456',
@@ -130,7 +130,7 @@ function Empleados({ user, onLogout }) {
   const eliminarEmpleado = async (id, nombre) => {
     if (window.confirm(`¿Estás seguro de eliminar a ${nombre}?`)) {
       try {
-        await axios.delete(`${API_URL}/empleados/${id}`);
+        await axios.delete(`${API_URL}/empleados?action=detail&id=${id}`);
         alert('✅ Empleado eliminado');
         cargarEmpleados();
       } catch (error) {
@@ -143,16 +143,16 @@ function Empleados({ user, onLogout }) {
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', overflowX: 'hidden' }}>
       <Navbar user={user} onLogout={onLogout} />
 
-      <div className="container" style={{ 
-        maxWidth: isMobile ? '100%' : '1200px', 
+      <div className="container" style={{
+        maxWidth: isMobile ? '100%' : '1200px',
         padding: isMobile ? '0.75rem' : '0 1rem',
         margin: '0 auto',
         overflowX: 'hidden'
       }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: isMobile ? '1rem' : '2rem',
           flexWrap: 'wrap',
           gap: '1rem'
@@ -163,8 +163,8 @@ function Empleados({ user, onLogout }) {
           <button
             onClick={() => showForm ? cancelar() : setShowForm(true)}
             className="btn btn-primary"
-            style={{ 
-              fontSize: isMobile ? '0.85rem' : '1rem', 
+            style={{
+              fontSize: isMobile ? '0.85rem' : '1rem',
               padding: isMobile ? '0.5rem 1rem' : '0.6rem 1.2rem',
               background: '#10b981',  // VERDE para ver cambio
               whiteSpace: 'nowrap'
@@ -354,14 +354,14 @@ function Empleados({ user, onLogout }) {
                       {emp.cargo}
                     </div>
                   </div>
-                  
+
                   {(emp.email || emp.telefono) && (
                     <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem', wordBreak: 'break-all' }}>
                       {emp.email && <div>📧 {emp.email}</div>}
                       {emp.telefono && <div>📱 {emp.telefono}</div>}
                     </div>
                   )}
-                  
+
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%' }}>
                     <button
                       onClick={() => editarEmpleado(emp)}

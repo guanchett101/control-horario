@@ -37,7 +37,7 @@ function Dashboard({ user, onLogout }) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const response = await axios.get(`${API_URL}/registros/hoy`, {
+      const response = await axios.get(`${API_URL}/registros?action=hoy`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         signal: controller.signal
       });

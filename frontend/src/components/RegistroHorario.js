@@ -29,7 +29,7 @@ function RegistroHorario({ user, onLogout }) {
     try {
       const hoy = new Date().toISOString().split('T')[0];
       const response = await axios.get(
-        `${API_URL}/registros/empleado/${user.empleadoId}?fechaInicio=${hoy}&fechaFin=${hoy}`
+        `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${hoy}&fechaFin=${hoy}`
       );
       setRegistrosHoy(response.data);
     } catch (error) {
@@ -45,7 +45,7 @@ function RegistroHorario({ user, onLogout }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/registros/entrada`, {
+      const response = await axios.post(`${API_URL}/registros?action=entrada`, {
         empleadoId: user.empleadoId
       });
       setMensaje(`✅ Entrada registrada a las ${response.data.hora}`);
@@ -65,7 +65,7 @@ function RegistroHorario({ user, onLogout }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/registros/salida`, {
+      const response = await axios.post(`${API_URL}/registros?action=salida`, {
         empleadoId: user.empleadoId
       });
       setMensaje(`✅ Salida registrada a las ${response.data.hora}`);

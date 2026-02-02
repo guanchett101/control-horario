@@ -35,7 +35,7 @@ function CambiarPassword({ user, onLogout }) {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/auth/cambiar-password`, {
+      await axios.post(`${API_URL}/auth?action=cambiar-password`, {
         userId: user.id,
         passwordActual: passwordActual,
         passwordNueva: passwordNueva
@@ -45,7 +45,7 @@ function CambiarPassword({ user, onLogout }) {
       setPasswordActual('');
       setPasswordNueva('');
       setPasswordConfirmar('');
-      
+
       setTimeout(() => setMensaje(''), 5000);
     } catch (err) {
       setError(err.response?.data?.error || 'Error al cambiar contraseña');
@@ -57,7 +57,7 @@ function CambiarPassword({ user, onLogout }) {
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
-      
+
       <div className="container" style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
         <h2 style={{ marginBottom: '2rem', color: '#111827' }}>🔐 Cambiar Contraseña</h2>
 
@@ -95,7 +95,7 @@ function CambiarPassword({ user, onLogout }) {
               {mensaje}
             </div>
           )}
-          
+
           {error && (
             <div style={{
               background: '#fee2e2',
@@ -160,9 +160,9 @@ function CambiarPassword({ user, onLogout }) {
               />
             </div>
 
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
+            <button
+              type="submit"
+              className="btn btn-primary"
               disabled={loading}
               style={{ width: '100%', marginTop: '1rem' }}
             >

@@ -18,7 +18,7 @@ function Login({ onLogin }) {
 
   const cargarUsuarios = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/usuarios`);
+      const response = await axios.get(`${API_URL}/auth?action=usuarios`);
       setUsuarios(response.data);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
@@ -36,7 +36,7 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${API_URL}/auth?action=login`, {
         username: selectedUser,
         password: password
       });

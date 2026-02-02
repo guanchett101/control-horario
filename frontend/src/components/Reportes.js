@@ -26,7 +26,7 @@ function Reportes({ user, onLogout }) {
 
   const cargarEmpleados = async () => {
     try {
-      const response = await axios.get(`${API_URL}/empleados`);
+      const response = await axios.get(`${API_URL}/empleados?action=list`);
       setEmpleados(response.data);
     } catch (error) {
       console.error('Error al cargar empleados:', error);
@@ -46,7 +46,7 @@ function Reportes({ user, onLogout }) {
 
     try {
       const response = await axios.get(
-        `${API_URL}/registros/empleado/${empleadoId}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
+        `${API_URL}/registros?action=empleado&id=${empleadoId}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
       );
       setRegistros(response.data);
     } catch (error) {

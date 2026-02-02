@@ -1,51 +1,5 @@
 {
-  "functions": {
-    "api/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/auth/login",
-      "destination": "/api/auth.js?action=login"
-    },
-    {
-      "source": "/api/auth/usuarios",
-      "destination": "/api/auth.js?action=usuarios"
-    },
-    {
-      "source": "/api/auth/register",
-      "destination": "/api/auth.js?action=register"
-    },
-    {
-      "source": "/api/auth/cambiar-password",
-      "destination": "/api/auth.js?action=cambiar-password"
-    },
-    {
-      "source": "/api/registros/hoy",
-      "destination": "/api/registros.js?action=hoy"
-    },
-    {
-      "source": "/api/registros/entrada",
-      "destination": "/api/registros.js?action=entrada"
-    },
-    {
-      "source": "/api/registros/salida",
-      "destination": "/api/registros.js?action=salida"
-    },
-    {
-      "source": "/api/registros/empleado/:id",
-      "destination": "/api/registros.js?action=empleado&id=:id"
-    },
-    {
-      "source": "/api/empleados",
-      "destination": "/api/empleados.js?action=list"
-    },
-    {
-      "source": "/api/empleados/:id",
-      "destination": "/api/empleados.js?action=detail&id=:id"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
