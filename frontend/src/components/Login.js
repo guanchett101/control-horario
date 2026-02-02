@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import bcrypt from 'bcryptjs';
+import { supabase } from '../supabaseClient';
 import './Login.css';
-
-const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function Login({ onLogin }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -18,10 +17,28 @@ function Login({ onLogin }) {
 
   const cargarUsuarios = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/usuarios`, {
-        timeout: 10000 // 10 segundos de timeout
-      });
-      setUsuarios(Array.isArray(response.data) ? response.data : []);
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select(`
+          username,
+          rol,
+          empleados (
+            nombre,
+            apellido
+          )
+        `)
+        .order('username', { ascending: true });
+
+      if (error) throw error;
+
+      const usuariosFormateados = data.map(u => ({
+        username: u.username,
+        nombre: u.empleados.nombre,
+        apellido: u.empleados.apellido,
+        rol: u.rol
+      }));
+
+      setUsuarios(usuariosFormateados);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
       setError('Error de conexión. Verifica tu internet o recarga la página.');
@@ -38,23 +55,56 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      // Forzar un guardado temporal en sessionStorage para prevenir pérdida en redirección
-      try {
-        sessionStorage.setItem('pending_user', selectedUser);
-      } catch (e) { }
+      // Obtener usuario de la base de datos
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select(`
+          *,
+          empleados (
+            nombre,
+            apellido
+          )
+        `)
+        .eq('username', selectedUser)
+        .single();
 
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        username: selectedUser,
-        password
-      }, { timeout: 15000 });
+      if (error || !data) {
+        setError('Credenciales inválidas');
+        setPassword('');
+        setLoading(false);
+        return;
+      }
 
-      onLogin(response.data.user, response.data.token);
+      // Verificar contraseña
+      const isMatch = await bcrypt.compare(password, data.password_hash);
+      if (!isMatch) {
+        setError('Credenciales inválidas');
+        setPassword('');
+        setLoading(false);
+        return;
+      }
+
+      // Crear token simple (solo para mantener compatibilidad)
+      const token = btoa(JSON.stringify({ 
+        id: data.id, 
+        empleadoId: data.empleado_id, 
+        rol: data.rol,
+        timestamp: Date.now()
+      }));
+
+      const user = {
+        id: data.id,
+        empleadoId: data.empleado_id,
+        nombre: data.empleados.nombre,
+        apellido: data.empleados.apellido,
+        rol: data.rol,
+        username: data.username
+      };
+
+      onLogin(user, token);
     } catch (err) {
       console.error('Login error:', err);
-      const msg = err.response?.data?.error || 'Error de conexión con el servidor';
-      setError(msg);
-
-      // Limpiar password si falla
+      setError('Error de conexión con el servidor');
       setPassword('');
     } finally {
       setLoading(false);
