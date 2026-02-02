@@ -7,18 +7,20 @@
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/api/empleados/:path*",
+      "destination": "/api/empleados.js"
+    },
+    {
+      "source": "/api/registros/:path*",
+      "destination": "/api/registros.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

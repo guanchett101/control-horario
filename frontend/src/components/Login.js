@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import bcrypt from 'bcryptjs';
-import { supabase } from '../supabaseClient';
+import axios from 'axios';
 import './Login.css';
+
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function Login({ onLogin }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -17,31 +18,11 @@ function Login({ onLogin }) {
 
   const cargarUsuarios = async () => {
     try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select(`
-          username,
-          rol,
-          empleados (
-            nombre,
-            apellido
-          )
-        `)
-        .order('username', { ascending: true });
-
-      if (error) throw error;
-
-      const usuariosFormateados = data.map(u => ({
-        username: u.username,
-        nombre: u.empleados.nombre,
-        apellido: u.empleados.apellido,
-        rol: u.rol
-      }));
-
-      setUsuarios(usuariosFormateados);
+      const response = await axios.get(`${API_URL}/auth/usuarios`);
+      setUsuarios(response.data);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
-      setError('Error de conexión. Verifica tu internet o recarga la página.');
+      setError('Error de conexión con el servidor. Verifica tu internet o las variables de entorno en Vercel.');
     } finally {
       setLoadingUsers(false);
     }
@@ -55,56 +36,16 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      // Obtener usuario de la base de datos
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select(`
-          *,
-          empleados (
-            nombre,
-            apellido
-          )
-        `)
-        .eq('username', selectedUser)
-        .single();
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        username: selectedUser,
+        password: password
+      });
 
-      if (error || !data) {
-        setError('Credenciales inválidas');
-        setPassword('');
-        setLoading(false);
-        return;
-      }
-
-      // Verificar contraseña
-      const isMatch = await bcrypt.compare(password, data.password_hash);
-      if (!isMatch) {
-        setError('Credenciales inválidas');
-        setPassword('');
-        setLoading(false);
-        return;
-      }
-
-      // Crear token simple (solo para mantener compatibilidad)
-      const token = btoa(JSON.stringify({ 
-        id: data.id, 
-        empleadoId: data.empleado_id, 
-        rol: data.rol,
-        timestamp: Date.now()
-      }));
-
-      const user = {
-        id: data.id,
-        empleadoId: data.empleado_id,
-        nombre: data.empleados.nombre,
-        apellido: data.empleados.apellido,
-        rol: data.rol,
-        username: data.username
-      };
-
+      const { user, token } = response.data;
       onLogin(user, token);
     } catch (err) {
       console.error('Login error:', err);
-      setError('Error de conexión con el servidor');
+      setError(err.response?.data?.error || 'Error de conexión con el servidor');
       setPassword('');
     } finally {
       setLoading(false);
