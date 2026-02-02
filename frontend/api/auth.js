@@ -19,11 +19,14 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const path = req.url.replace('/api/auth', '');
+  // Obtener action de query params o del path
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const action = url.searchParams.get('action');
+  const path = action ? `/${action}` : req.url.replace('/api/auth', '');
 
   try {
     // Login
-    if (req.method === 'POST' && path === '/login') {
+    if (req.method === 'POST' && (path === '/login' || action === 'login')) {
       const { username, password } = req.body;
 
       const { data, error } = await supabase
@@ -67,7 +70,7 @@ module.exports = async (req, res) => {
     }
 
     // Registrar usuario
-    if (req.method === 'POST' && path === '/register') {
+    if (req.method === 'POST' && (path === '/register' || action === 'register')) {
       const { empleadoId, username, password, rol } = req.body;
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -88,7 +91,7 @@ module.exports = async (req, res) => {
     }
 
     // Cambiar contraseña
-    if (req.method === 'POST' && path === '/cambiar-password') {
+    if (req.method === 'POST' && (path === '/cambiar-password' || action === 'cambiar-password')) {
       const { userId, passwordActual, passwordNueva } = req.body;
 
       if (!userId) {
@@ -125,7 +128,7 @@ module.exports = async (req, res) => {
     }
 
     // Obtener lista de usuarios
-    if (req.method === 'GET' && path === '/usuarios') {
+    if (req.method === 'GET' && (path === '/usuarios' || action === 'usuarios')) {
       const { data, error } = await supabase
         .from('usuarios')
         .select(`

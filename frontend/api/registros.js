@@ -17,11 +17,14 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const path = req.url.replace('/api/registros', '');
+  // Obtener action de query params o del path
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const action = url.searchParams.get('action');
+  const path = action ? `/${action}` : req.url.replace('/api/registros', '');
 
   try {
     // Registrar entrada
-    if (req.method === 'POST' && path === '/entrada') {
+    if (req.method === 'POST' && (path === '/entrada' || action === 'entrada')) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -42,7 +45,7 @@ module.exports = async (req, res) => {
     }
 
     // Registrar salida
-    if (req.method === 'POST' && path === '/salida') {
+    if (req.method === 'POST' && (path === '/salida' || action === 'salida')) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -71,8 +74,8 @@ module.exports = async (req, res) => {
     }
 
     // Obtener registros por empleado y rango de fechas
-    if (req.method === 'GET' && path.startsWith('/empleado/')) {
-      const id = path.split('/')[2];
+    if (req.method === 'GET' && (path.startsWith('/empleado/') || action === 'empleado')) {
+      const id = action === 'empleado' ? url.searchParams.get('id') : path.split('/')[2];
       const url = new URL(req.url, `http://${req.headers.host}`);
       const fechaInicio = url.searchParams.get('fechaInicio');
       const fechaFin = url.searchParams.get('fechaFin');
@@ -97,7 +100,7 @@ module.exports = async (req, res) => {
     }
 
     // Obtener todos los registros del día
-    if (req.method === 'GET' && path === '/hoy') {
+    if (req.method === 'GET' && (path === '/hoy' || action === 'hoy')) {
       const fecha = new Date().toISOString().split('T')[0];
 
       const { data, error } = await supabase

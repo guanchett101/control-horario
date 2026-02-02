@@ -17,12 +17,15 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // Obtener action de query params o del path
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const action = url.searchParams.get('action');
   const path = req.url.replace('/api/empleados', '');
-  const id = path.split('/')[1];
+  const id = url.searchParams.get('id') || path.split('/')[1];
 
   try {
     // Obtener todos los empleados
-    if (req.method === 'GET' && path === '') {
+    if (req.method === 'GET' && (path === '' || action === 'list')) {
       const { data, error } = await supabase
         .from('empleados')
         .select('*')
