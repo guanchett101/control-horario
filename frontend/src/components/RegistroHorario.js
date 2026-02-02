@@ -16,6 +16,7 @@ function RegistroHorario({ user, onLogout }) {
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
     cargarRegistrosHoy();
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarRegistrosHoy = async () => {

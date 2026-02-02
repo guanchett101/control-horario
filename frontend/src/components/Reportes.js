@@ -58,8 +58,8 @@ function Reportes({ user, onLogout }) {
 
   const calcularHoras = (entrada, salida) => {
     if (!entrada || !salida) return { texto: '-', minutos: 0 };
-    const [hE, mE, sE] = entrada.split(':').map(Number);
-    const [hS, mS, sS] = salida.split(':').map(Number);
+    const [hE, mE] = entrada.split(':').map(Number);
+    const [hS, mS] = salida.split(':').map(Number);
     const minutos = (hS * 60 + mS) - (hE * 60 + mE);
     const horas = Math.floor(minutos / 60);
     const mins = minutos % 60;

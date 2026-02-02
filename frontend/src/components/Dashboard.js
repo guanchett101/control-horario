@@ -11,15 +11,11 @@ function Dashboard({ user, onLogout }) {
   const [error, setError] = useState(null);
   const [horaActual, setHoraActual] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
-  const [datosListos, setDatosListos] = useState(false);
 
   useEffect(() => {
     // Detectar si es móvil
     const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setIsMobile(checkMobile);
-
-    // Marcar que el componente está listo
-    setDatosListos(true);
 
     // Reloj
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
