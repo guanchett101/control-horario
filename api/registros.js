@@ -17,11 +17,12 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const path = req.url.replace('/api/registros', '');
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const path = url.pathname.replace('/api/registros', '');
 
   try {
     // Registrar entrada
-    if (req.method === 'POST' && path === '/entrada') {
+    if (req.method === 'POST' && (path === '/entrada' || path === '/entrada/')) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -42,7 +43,7 @@ module.exports = async (req, res) => {
     }
 
     // Registrar salida
-    if (req.method === 'POST' && path === '/salida') {
+    if (req.method === 'POST' && (path === '/salida' || path === '/salida/')) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -97,7 +98,7 @@ module.exports = async (req, res) => {
     }
 
     // Obtener todos los registros del día
-    if (req.method === 'GET' && path === '/hoy') {
+    if (req.method === 'GET' && (path === '/hoy' || path === '/hoy/')) {
       const fecha = new Date().toISOString().split('T')[0];
 
       const { data, error } = await supabase
