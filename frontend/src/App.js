@@ -6,7 +6,6 @@ import RegistroHorario from './components/RegistroHorario';
 import Empleados from './components/Empleados';
 import Reportes from './components/Reportes';
 import CambiarPassword from './components/CambiarPassword';
-import storage from './utils/storage';
 import './App.css';
 
 function App() {
@@ -14,34 +13,27 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadUserSession();
-  }, []);
-
-  const loadUserSession = async () => {
     try {
-      const token = await storage.getItem('token');
-      const userData = await storage.getItem('user');
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
       
       if (token && userData) {
         const parsedUser = JSON.parse(userData);
         if (parsedUser && parsedUser.id && parsedUser.nombre) {
           setUser(parsedUser);
-        } else {
-          await storage.clear();
         }
       }
     } catch (error) {
       console.error('Error al cargar usuario:', error);
-      await storage.clear();
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleLogin = async (userData, token) => {
+  const handleLogin = (userData, token) => {
     try {
-      await storage.setItem('token', token);
-      await storage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
       console.error('Error al guardar sesión:', error);
@@ -49,8 +41,9 @@ function App() {
     }
   };
 
-  const handleLogout = async () => {
-    await storage.clear();
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 
