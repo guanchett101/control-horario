@@ -33,9 +33,8 @@ function Dashboard({ user, onLogout }) {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-      // Timeout de 10 segundos para móviles lentos
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const response = await axios.get(`${API_URL}/registros/hoy`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
@@ -48,9 +47,13 @@ function Dashboard({ user, onLogout }) {
     } catch (error) {
       console.error('Error al cargar registros:', error);
       if (error.name === 'AbortError') {
-        setError('Conexión lenta - Intenta recargar');
+        setError('Servidor lento: La base de datos está tardando en responder. Intenta recargar de nuevo.');
+      } else if (error.response?.status === 404) {
+        setError('Error de configuración: No se encontró la ruta de registros en el servidor.');
+      } else if (!navigator.onLine) {
+        setError('Sin conexión: Revisa tu conexión a internet.');
       } else {
-        setError('No se pudieron cargar los registros');
+        setError('Error de conexión: No se pudo contactar con la base de datos de Supabase desde Vercel.');
       }
       setRegistrosHoy([]);
     } finally {
@@ -366,116 +369,85 @@ function Dashboard({ user, onLogout }) {
         {/* Registros de Hoy */}
         <div style={{
           background: 'white',
-          borderRadius: '8px',
-          padding: '1.75rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e7eb'
+          borderRadius: '24px',
+          padding: isMobile ? '1.5rem' : '2rem',
+          boxShadow: 'var(--card-shadow)',
+          border: '1px solid rgba(241, 245, 249, 1)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
-            Actividad de Hoy
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>
+              Actividad de Hoy
+            </h3>
+            {!loading && (
+              <button
+                onClick={() => { setLoading(true); cargarRegistrosHoy(); }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                title="Actualizar"
+              >🔄</button>
+            )}
+          </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-              Cargando registros...
+            <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+              <div className="fade-in" style={{ fontSize: '2.5rem', marginBottom: '1rem', animationDirection: 'alternate', animationIterationCount: 'infinite' }}>⏳</div>
+              <p style={{ fontWeight: '600' }}>Actualizando datos en tiempo real...</p>
             </div>
           ) : registrosHoy.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
-              <p style={{ margin: 0 }}>No hay registros para hoy</p>
+            <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
+              <div style={{ fontSize: '4rem', marginBottom: '1.5rem', opacity: 0.5 }}>🍃</div>
+              <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Todo tranquilo por ahora.</p>
+              <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>No hay registros de actividad para hoy.</p>
             </div>
           ) : (
-            <div className="table-responsive">
-              {registrosHoy.slice(0, isMobile ? 5 : registrosHoy.length).map((registro) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {registrosHoy.slice(0, isMobile ? 8 : registrosHoy.length).map((registro) => (
                 <div key={registro.id} style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: isMobile ? '0.75rem' : '1rem',
-                  borderBottom: '1px solid #f3f4f6',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
+                  padding: isMobile ? '1rem' : '1.25rem',
+                  background: '#f8fafc',
+                  borderRadius: '16px',
+                  border: '1px solid #f1f5f9',
+                  transition: 'all 0.2s ease',
+                  gap: '1rem'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                    <div style={{
-                      width: isMobile ? '36px' : '42px',
-                      height: isMobile ? '36px' : '42px',
-                      borderRadius: '8px',
-                      background: registro.hora_salida ? '#ef4444' : '#10b981',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: '600',
-                      fontSize: isMobile ? '0.85rem' : '1rem'
-                    }}>
-                      {registro.empleados?.nombre?.charAt(0) || '?'}{registro.empleados?.apellido?.charAt(0) || '?'}
+                  <div style={{
+                    width: isMobile ? '40px' : '48px',
+                    height: isMobile ? '40px' : '48px',
+                    borderRadius: '12px',
+                    background: registro.hora_salida ? 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)' : 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: '800',
+                    fontSize: isMobile ? '0.8rem' : '1rem',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                  }}>
+                    {registro.empleados?.nombre?.charAt(0) || '?'}{registro.empleados?.apellido?.charAt(0) || '?'}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '700', color: '#1e293b', fontSize: isMobile ? '0.9rem' : '1.05rem' }}>
+                      {registro.empleados?.nombre || 'N/A'} {registro.empleados?.apellido || ''}
                     </div>
-                    <div>
-                      <div style={{ fontWeight: '600', color: '#111827', fontSize: isMobile ? '0.85rem' : '0.95rem' }}>
-                        {registro.empleados?.nombre || 'N/A'} {registro.empleados?.apellido || ''}
-                      </div>
-                      {!isMobile && (
-                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                          {registro.empleados?.cargo || 'Sin cargo'}
-                        </div>
-                      )}
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.02em' }}>
+                      {registro.empleados?.cargo || 'Empleado'}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: isMobile ? '1rem' : '2rem', alignItems: 'center', fontSize: isMobile ? '0.85rem' : '1rem' }}>
-                    <div>
-                      <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
-                        Entrada
-                      </div>
-                      <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
-                        {registro.hora_entrada || '-'}
-                      </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginBottom: '0.25rem' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: '600' }}>ENTRADA: <span style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.85rem' }}>{registro.hora_entrada || '--:--'}</span></div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
-                        Salida
-                      </div>
-                      <div style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>
-                        {registro.hora_salida || '-'}
-                      </div>
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: '600' }}>SALIDA: <span style={{ color: registro.hora_salida ? '#0f172a' : '#10b981', fontFamily: 'monospace', fontSize: '0.85rem' }}>{registro.hora_salida || 'EN CURSO'}</span></div>
                     </div>
-                    {!isMobile && (
-                      <div>
-                        {registro.hora_salida ? (
-                          <span style={{
-                            background: '#fee2e2',
-                            color: '#dc2626',
-                            padding: '0.4rem 0.9rem',
-                            borderRadius: '6px',
-                            fontSize: '0.8rem',
-                            fontWeight: '600'
-                          }}>
-                            Salió
-                          </span>
-                        ) : (
-                          <span style={{
-                            background: '#d1fae5',
-                            color: '#059669',
-                            padding: '0.4rem 0.9rem',
-                            borderRadius: '6px',
-                            fontSize: '0.8rem',
-                            fontWeight: '600'
-                          }}>
-                            Presente
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
-              {isMobile && registrosHoy.length > 5 && (
-                <div style={{ textAlign: 'center', padding: '1rem', color: '#6b7280', fontSize: '0.85rem' }}>
-                  Mostrando 5 de {registrosHoy.length} registros
-                </div>
-              )}
             </div>
           )}
         </div>
