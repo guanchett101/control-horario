@@ -12,7 +12,13 @@ function RegistroHorario({ user, onLogout }) {
   const [registrosHoy, setRegistrosHoy] = useState([]);
   const [loadingRegistros, setLoadingRegistros] = useState(true);
 
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
+    // Detectar si es móvil
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile);
+
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
     cargarRegistrosHoy();
     return () => clearInterval(interval);
@@ -97,25 +103,25 @@ function RegistroHorario({ user, onLogout }) {
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
-      
-      <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+
+      <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: isMobile ? '0.75rem' : '1.5rem', boxSizing: 'border-box' }}>
         {/* Header con reloj */}
-        <div style={{ 
+        <div style={{
           background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-          borderRadius: '8px',
-          padding: '2rem',
+          borderRadius: '12px',
+          padding: isMobile ? '1.5rem' : '2rem',
           color: 'white',
-          marginBottom: '2rem',
-          boxShadow: '0 2px 12px rgba(30, 60, 114, 0.15)',
+          marginBottom: '1.5rem',
+          boxShadow: '0 4px 15px rgba(30, 60, 114, 0.2)',
           textAlign: 'center'
         }}>
-          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
+          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: '700' }}>
             {user.nombre} {user.apellido}
           </h1>
-          <p style={{ margin: '0 0 1.5rem 0', opacity: 0.9, fontSize: '0.9rem' }}>
+          <p style={{ margin: '0 0 1rem 0', opacity: 0.9, fontSize: '0.85rem' }}>
             {formatearFecha(horaActual)}
           </p>
-          <div style={{ fontSize: '3rem', fontWeight: '600', lineHeight: 1, fontFamily: 'monospace' }}>
+          <div style={{ fontSize: isMobile ? '2.5rem' : '3.5rem', fontWeight: '800', lineHeight: 1, fontFamily: 'monospace', letterSpacing: '1px' }}>
             {formatearHora(horaActual)}
           </div>
         </div>
@@ -135,7 +141,7 @@ function RegistroHorario({ user, onLogout }) {
             {mensaje}
           </div>
         )}
-        
+
         {error && (
           <div style={{
             background: '#fee2e2',
@@ -163,10 +169,14 @@ function RegistroHorario({ user, onLogout }) {
           <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
             Registrar Horario
           </h3>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <button 
-              onClick={registrarEntrada} 
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap: isMobile ? '0.75rem' : '1.5rem'
+          }}>
+            <button
+              onClick={registrarEntrada}
               disabled={loading || yaRegistroEntrada}
               style={{
                 background: yaRegistroEntrada ? '#9ca3af' : '#10b981',
@@ -198,9 +208,9 @@ function RegistroHorario({ user, onLogout }) {
               <span style={{ fontSize: '2rem' }}>🟢</span>
               {loading ? 'Registrando...' : yaRegistroEntrada ? 'Ya registrado' : 'Registrar Entrada'}
             </button>
-            
-            <button 
-              onClick={registrarSalida} 
+
+            <button
+              onClick={registrarSalida}
               disabled={loading || !yaRegistroEntrada}
               style={{
                 background: !yaRegistroEntrada ? '#9ca3af' : '#ef4444',
@@ -260,7 +270,7 @@ function RegistroHorario({ user, onLogout }) {
           <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
             📋 Registros de Hoy
           </h3>
-          
+
           {loadingRegistros ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
               Cargando...

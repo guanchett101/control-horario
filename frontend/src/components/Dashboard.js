@@ -20,14 +20,12 @@ function Dashboard({ user, onLogout }) {
     // Reloj
     const interval = setInterval(() => setHoraActual(new Date()), 1000);
 
-    // Cargar registros después de 500ms (dar tiempo a que se renderice)
-    const timeout = setTimeout(() => {
-      cargarRegistrosHoy();
-    }, 500);
+    // Cargar registros inmediatamente
+    setLoading(true);
+    cargarRegistrosHoy();
 
     return () => {
       clearInterval(interval);
-      clearTimeout(timeout);
     };
   }, []);
 
@@ -81,30 +79,44 @@ function Dashboard({ user, onLogout }) {
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Navbar user={user} onLogout={onLogout} />
 
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+      <div className="container" style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: isMobile ? '1rem' : '1.5rem',
+        boxSizing: 'border-box'
+      }}>
         {/* Header con reloj */}
         <div style={{
           background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-          borderRadius: '8px',
-          padding: '2rem',
+          borderRadius: '12px',
+          padding: isMobile ? '1.25rem' : '2rem',
           color: 'white',
-          marginBottom: '2rem',
-          boxShadow: '0 2px 12px rgba(30, 60, 114, 0.15)'
+          marginBottom: '1.5rem',
+          boxShadow: '0 4px 15px rgba(30, 60, 114, 0.2)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: isMobile ? 'column' : 'row',
+            textAlign: isMobile ? 'center' : 'left',
+            gap: '1rem'
+          }}>
             <div>
-              <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: '600' }}>
+              <h1 style={{ margin: '0 0 0.25rem 0', fontSize: isMobile ? '1.5rem' : '1.75rem', fontWeight: '700' }}>
                 Hola, {user?.nombre || 'Usuario'}
               </h1>
-              <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem' }}>
+              <p style={{ margin: 0, opacity: 0.9, fontSize: '0.875rem' }}>
                 {formatearFecha(horaActual)}
               </p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: '600', lineHeight: 1, fontFamily: 'monospace' }}>
+            <div style={{ textAlign: isMobile ? 'center' : 'right' }}>
+              <div style={{ fontSize: isMobile ? '2rem' : '2.5rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace', letterSpacing: '1px' }}>
                 {formatearHora(horaActual)}
               </div>
-              <div style={{ fontSize: '0.875rem', opacity: 0.9, marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {user?.rol === 'admin' ? 'Administrador' : 'Empleado'}
               </div>
             </div>
@@ -150,9 +162,9 @@ function Dashboard({ user, onLogout }) {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1.25rem',
-          marginBottom: '2rem'
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: isMobile ? '0.75rem' : '1.25rem',
+          marginBottom: '1.5rem'
         }}>
           <div style={{
             background: 'white',
