@@ -153,7 +153,7 @@ function Dashboard({ user, onLogout }) {
               <span style={{ fontSize: '1.5rem' }}>⚠️</span>
               <div style={{ flex: 1 }}>
                 <strong style={{ display: 'block' }}>{error}</strong>
-                {error.includes('configuración') && (
+                {error && typeof error === 'string' && error.includes('configuración') && debugInfo && (
                   <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'monospace' }}>
                     Error del Servidor: {debugInfo?.error || 'N/A'}<br />
                     URL: {debugInfo?.debug?.url || 'N/A'}<br />
