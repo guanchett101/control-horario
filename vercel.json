@@ -1,6 +1,18 @@
 {
   "rewrites": [
     {
+      "source": "/api/auth",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/registros",
+      "destination": "/api/registros.js"
+    },
+    {
+      "source": "/api/empleados",
+      "destination": "/api/empleados.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
