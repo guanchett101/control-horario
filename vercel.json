@@ -1,9 +1,4 @@
 {
-  "buildCommand": "cd frontend && CI=false npm install && npm run build",
-  "outputDirectory": "frontend/build",
-  "devCommand": "cd frontend && npm start",
-  "installCommand": "cd frontend && npm install",
-  "framework": "create-react-app",
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
@@ -19,9 +14,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "CI": "false",
-    "DISABLE_ESLINT_PLUGIN": "true"
-  }
+  ]
 }
