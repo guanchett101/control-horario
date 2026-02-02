@@ -152,12 +152,10 @@ function Dashboard({ user, onLogout }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <span style={{ fontSize: '1.5rem' }}>⚠️</span>
               <div style={{ flex: 1 }}>
-                <strong style={{ display: 'block' }}>{error}</strong>
-                {error && typeof error === 'string' && error.includes('configuración') && debugInfo && (
-                  <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'monospace' }}>
-                    Error del Servidor: {debugInfo?.error || 'N/A'}<br />
-                    URL: {debugInfo?.debug?.url || 'N/A'}<br />
-                    Acción: {debugInfo?.debug?.action || 'N/A'}
+                <strong style={{ display: 'block' }}>{String(error)}</strong>
+                {debugInfo && (
+                  <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', fontSize: '0.8rem', fontFamily: 'monospace', overflowX: 'auto' }}>
+                    <pre style={{ margin: 0 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
                   </div>
                 )}
                 <span style={{ fontSize: '0.85rem', opacity: 0.8, display: 'block', marginTop: '0.5rem' }}>

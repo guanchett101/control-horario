@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { parse } = require('url');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -6,6 +7,7 @@ const supabase = createClient(
 );
 
 module.exports = async (req, res) => {
+  // Configuración CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -16,16 +18,13 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Detectar acción por query param (Vercel rewrite) o por URL original
-  const url = req.url || '';
-  const query = new URL(url, `http://${req.headers.host}`).searchParams;
-  const action = query.get('action');
-
-  const isAction = (target) => action === target || url.includes('/' + target);
+  // Parseo seguro de URL y Query Params
+  const { query } = parse(req.url, true);
+  const action = query.action;
 
   try {
-    // Registrar entrada
-    if (req.method === 'POST' && isAction('entrada')) {
+    // 1. REGISTRAR ENTRADA
+    if (req.method === 'POST' && (action === 'entrada' || req.url.includes('/entrada'))) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -39,8 +38,8 @@ module.exports = async (req, res) => {
       return res.status(201).json({ id: data[0].id, message: 'Entrada registrada', hora });
     }
 
-    // Registrar salida
-    if (req.method === 'POST' && isAction('salida')) {
+    // 2. REGISTRAR SALIDA
+    if (req.method === 'POST' && (action === 'salida' || req.url.includes('/salida'))) {
       const { empleadoId } = req.body;
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
@@ -56,7 +55,7 @@ module.exports = async (req, res) => {
 
       if (searchError) throw searchError;
       if (!registros || registros.length === 0) {
-        return res.status(404).json({ error: 'No hay registro de entrada para hoy' });
+        return res.status(404).json({ error: 'No hay registro de entrada pendiente para hoy' });
       }
 
       const { error: updateError } = await supabase
@@ -68,43 +67,58 @@ module.exports = async (req, res) => {
       return res.json({ message: 'Salida registrada', hora });
     }
 
-    // Obtener todos los registros del día
-    if (req.method === 'GET' && isAction('hoy')) {
+    // 3. OBTENER REGISTROS DE HOY
+    if (req.method === 'GET' && (action === 'hoy' || req.url.includes('/hoy'))) {
       const fecha = new Date().toISOString().split('T')[0];
 
       const { data, error } = await supabase
         .from('registros_horario')
-        .select('*, empleados(nombre, apellido, cargo)')
+        .select(`
+          *,
+          empleados (
+            nombre,
+            apellido,
+            cargo
+          )
+        `)
         .eq('fecha', fecha)
         .order('hora_entrada', { ascending: false });
 
       if (error) throw error;
-      return res.json(data);
+      return res.json(data || []);
     }
 
-    // Reportes por empleado
-    if (req.method === 'GET' && isAction('empleado')) {
-      const id = query.get('id') || url.split('/empleado/')[1]?.split('?')[0];
-      const fechaInicio = query.get('fechaInicio') || url.split('fechaInicio=')[1]?.split('&')[0];
-      const fechaFin = query.get('fechaFin') || url.split('fechaFin=')[1]?.split('&')[0];
+    // 4. REPORTES POR EMPLEADO
+    if (req.method === 'GET' && (action === 'empleado' || req.url.includes('/empleado'))) {
+      const id = query.id || (req.url.split('/empleado/')[1] || '').split('?')[0];
+      const fechaInicio = query.fechaInicio;
+      const fechaFin = query.fechaFin;
 
-      const { data, error } = await supabase
+      if (!id) return res.status(400).json({ error: 'ID de empleado requerido' });
+
+      let querySupabase = supabase
         .from('registros_horario')
         .select('*, empleados(nombre, apellido)')
         .eq('empleado_id', id)
-        .gte('fecha', fechaInicio)
-        .lte('fecha', fechaFin)
         .order('fecha', { ascending: false });
 
+      if (fechaInicio) querySupabase = querySupabase.gte('fecha', fechaInicio);
+      if (fechaFin) querySupabase = querySupabase.lte('fecha', fechaFin);
+
+      const { data, error } = await querySupabase;
+
       if (error) throw error;
-      return res.json(data);
+      return res.json(data || []);
     }
 
+    // Fallback error
     res.status(404).json({
-      error: 'Ruta no encontrada r9',
-      debug: { url, action, method: req.method }
+      error: 'Ruta de registros no encontrada (r10)',
+      debug: { url: req.url, action, method: req.method }
     });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('API Error:', error);
+    res.status(500).json({ error: error.message || 'Error interno del servidor' });
   }
 };
