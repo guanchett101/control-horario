@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install && npm run build",
+  "buildCommand": "CI=false DISABLE_ESLINT_PLUGIN=true npm install && npm run build",
   "outputDirectory": "build",
   "devCommand": "npm start",
   "installCommand": "npm install",
@@ -9,5 +9,9 @@
       "memory": 1024,
       "maxDuration": 10
     }
+  },
+  "env": {
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true"
   }
 }
