@@ -32,7 +32,8 @@ function Login({ onLogin }) {
       console.error('Error al cargar usuarios:', err);
       // Fallback: If API fails, allow manual entry by not setting users but stopping loading
       setUsuarios([]);
-      setError('No se pudo cargar la lista de usuarios. Puedes escribir tu nombre para intentar acceder.');
+      const errorMsg = err.response?.data?.error || err.message || 'Error desconocido';
+      setError(`Error cargando usuarios: ${errorMsg}. Puedes escribir manual.`);
     } finally {
       setLoadingUsers(false);
     }

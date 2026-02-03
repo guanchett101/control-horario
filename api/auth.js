@@ -8,6 +8,10 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  console.error('FATAL: Faltan variables de entorno SUPABASE_URL o SUPABASE_KEY');
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,6 +21,10 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
+  }
+
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    return res.status(500).json({ error: 'Faltan variables de entorno (SUPABASE_URL/KEY) en el servidor' });
   }
 
   const { query } = parse(req.url, true);
