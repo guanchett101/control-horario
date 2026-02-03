@@ -8,8 +8,8 @@
     "dev": "nodemon server.js",
     "client": "cd frontend && npm start",
     "install-client": "cd frontend && npm install",
-    "build": "cd frontend && npm install && npm run build",
-    "vercel-build": "cd frontend && npm install && npm run build",
+    "build": "cd frontend && npm install && PUBLIC_URL=/ npm run build",
+    "vercel-build": "cd frontend && npm install && PUBLIC_URL=/ npm run build",
     "verificar": "node scripts/verificar-setup.js",
     "generar-password": "node scripts/generar-password.js"
   },
