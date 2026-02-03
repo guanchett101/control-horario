@@ -1,11 +1,19 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1.js"
+      "source": "/api/auth",
+      "destination": "/api/auth.js"
     },
     {
-      "source": "/((?!api).*)",
+      "source": "/api/registros",
+      "destination": "/api/registros.js"
+    },
+    {
+      "source": "/api/empleados",
+      "destination": "/api/empleados.js"
+    },
+    {
+      "source": "/((?!api|static|favicon|logo|manifest|.*\\..*).*)",
       "destination": "/index.html"
     }
   ]
