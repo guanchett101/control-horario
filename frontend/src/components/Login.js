@@ -24,7 +24,9 @@ function Login({ onLogin }) {
       setUsuarios(response.data);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
-      setError('No se pudo conectar con el servidor. Verifica tu conexión.');
+      // Fallback: If API fails, allow manual entry by not setting users but stopping loading
+      setUsuarios([]);
+      setError('No se pudo cargar la lista de usuarios. Puedes escribir tu nombre para intentar acceder.');
     } finally {
       setLoadingUsers(false);
     }
@@ -82,25 +84,39 @@ function Login({ onLogin }) {
             <form onSubmit={handleSubmit} className="login-form">
               <div className="form-group">
                 <label htmlFor="user-select">Identifícate</label>
-                <div className="select-wrapper">
-                  <select
-                    id="user-select"
-                    value={selectedUser}
-                    onChange={(e) => setSelectedUser(e.target.value)}
-                    required
-                    className={selectedUser ? 'has-value' : ''}
-                  >
-                    <option value="" disabled>-- Selecciona tu nombre --</option>
-                    {usuarios.map((user) => (
-                      <option key={user.username} value={user.username}>
-                        {user.nombre} {user.apellido}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="user-role-badge">
-                    {usuarios.find(u => u.username === selectedUser)?.rol || 'Usuario'}
-                  </span>
-                </div>
+                {usuarios.length > 0 ? (
+                  <div className="select-wrapper">
+                    <select
+                      id="user-select"
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      required
+                      className={selectedUser ? 'has-value' : ''}
+                    >
+                      <option value="" disabled>-- Selecciona tu nombre --</option>
+                      {usuarios.map((user) => (
+                        <option key={user.username} value={user.username}>
+                          {user.nombre} {user.apellido}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="user-role-badge">
+                      {usuarios.find(u => u.username === selectedUser)?.rol || 'Usuario'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="input-wrapper">
+                    <input
+                      id="user-input"
+                      type="text"
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      required
+                      placeholder="Escribe tu usuario (ej. Juan)"
+                      className="manual-user-input"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
