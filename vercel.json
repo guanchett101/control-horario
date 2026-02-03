@@ -2,11 +2,11 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1.js"
+      "source": "/api/:match*",
+      "destination": "/api/:match*"
     },
     {
-      "source": "/((?!api|static|favicon|logo|manifest|.*\\..*).*)",
+      "source": "/((?!api|static|favicon.ico).*)",
       "destination": "/index.html"
     }
   ]
