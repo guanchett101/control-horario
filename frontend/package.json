@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "/",
   "proxy": "http://localhost:3001",
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",
