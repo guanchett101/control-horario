@@ -44,18 +44,20 @@ module.exports = async (req, res) => {
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0];
 
+      // Buscar el último registro de entrada que no tenga hora de salida
+      // Quitamos la restricción de fecha estricta para que si alguien olvidó fichar ayer
+      // o hay desfases de zona horaria, pueda cerrar su turno hoy.
       const { data: registros, error: searchError } = await supabase
         .from('registros_horario')
         .select('*')
         .eq('empleado_id', empleadoId)
-        .eq('fecha', fecha)
         .is('hora_salida', null)
         .order('id', { ascending: false })
         .limit(1);
 
       if (searchError) throw searchError;
       if (!registros || registros.length === 0) {
-        return res.status(404).json({ error: 'No hay registro de entrada pendiente para hoy' });
+        return res.status(404).json({ error: 'No tienes ninguna entrada abierta para registrar salida.' });
       }
 
       const { error: updateError } = await supabase
