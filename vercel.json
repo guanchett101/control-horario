@@ -1,37 +1,22 @@
 {
   "version": 2,
-  "builds": [
+  "outputDirectory": "frontend/build",
+  "rewrites": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/api/auth",
+      "destination": "/api/auth"
     },
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "frontend/build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/auth",
-      "dest": "/api/auth.js"
+      "source": "/api/empleados",
+      "destination": "/api/empleados"
     },
     {
-      "src": "/api/empleados",
-      "dest": "/api/empleados.js"
+      "source": "/api/registros",
+      "destination": "/api/registros"
     },
     {
-      "src": "/api/registros",
-      "dest": "/api/registros.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
