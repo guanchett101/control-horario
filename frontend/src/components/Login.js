@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
+import bgImage from '../assets/images/login-bg.png';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
@@ -11,6 +12,7 @@ function Login({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     cargarUsuarios();
@@ -22,7 +24,7 @@ function Login({ onLogin }) {
       setUsuarios(response.data);
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
-      setError('Error de conexión con el servidor. Verifica tu internet o las variables de entorno en Vercel.');
+      setError('No se pudo conectar con el servidor. Verifica tu conexión.');
     } finally {
       setLoadingUsers(false);
     }
@@ -45,7 +47,7 @@ function Login({ onLogin }) {
       onLogin(user, token);
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.error || 'Error de conexión con el servidor');
+      setError(err.response?.data?.error || 'Error de autenticación. Revisa tus credenciales.');
       setPassword('');
     } finally {
       setLoading(false);
@@ -53,62 +55,96 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>Control de Horarios</h2>
-        <p className="subtitle">Iniciar Sesión</p>
+    <div className="login-wrapper">
+      <div className="login-background" style={{ backgroundImage: `url(${bgImage})` }}></div>
 
-        {error && <div className="alert alert-error">{error}</div>}
-
-        {loadingUsers ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <p>Cargando usuarios...</p>
+      <div className="login-container fade-in">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="logo-icon">⏰</div>
+            <h1>Control de Horarios</h1>
+            <p className="subtitle">Gestión de Tiempo Profesional</p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} autoComplete="off">
-            <div className="form-group">
-              <label>Selecciona tu usuario</label>
-              <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                required
-                autoComplete="off"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '1rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: 'white'
-                }}
-              >
-                <option value="">-- Selecciona tu nombre --</option>
-                {usuarios.map((user) => (
-                  <option key={user.username} value={user.username}>
-                    {user.nombre} {user.apellido} ({user.rol})
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div className="form-group">
-              <label>Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Ingresa tu contraseña"
-                autoComplete="off"
-                name="user-password"
-              />
+          {error && (
+            <div className="login-error slide-in">
+              <span className="error-icon">⚠️</span>
+              {error}
             </div>
+          )}
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading || !selectedUser}>
-              {loading ? 'Iniciando...' : 'Iniciar Sesión'}
-            </button>
-          </form>
-        )}
+          {loadingUsers ? (
+            <div className="loading-users">
+              <div className="spinner"></div>
+              <p>Sincronizando equipo...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="user-select">Identifícate</label>
+                <div className="select-wrapper">
+                  <select
+                    id="user-select"
+                    value={selectedUser}
+                    onChange={(e) => setSelectedUser(e.target.value)}
+                    required
+                    className={selectedUser ? 'has-value' : ''}
+                  >
+                    <option value="" disabled>-- Selecciona tu nombre --</option>
+                    {usuarios.map((user) => (
+                      <option key={user.username} value={user.username}>
+                        {user.nombre} {user.apellido}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="user-role-badge">
+                    {usuarios.find(u => u.username === selectedUser)?.rol || 'Usuario'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Tu Clave Acceso</label>
+                <div className="input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex="-1"
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="login-actions">
+                <button
+                  type="submit"
+                  className={`login-button ${loading ? 'loading' : ''}`}
+                  disabled={loading || !selectedUser}
+                >
+                  <span className="button-text">
+                    {loading ? 'Iniciando sesión...' : 'Entrar al Panel'}
+                  </span>
+                  {!loading && <span className="button-icon">→</span>}
+                </button>
+              </div>
+
+              <div className="login-footer">
+                <p>© 2026 Sistema Horario • Seguridad Supabase</p>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
