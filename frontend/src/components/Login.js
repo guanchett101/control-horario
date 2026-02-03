@@ -21,7 +21,13 @@ function Login({ onLogin }) {
   const cargarUsuarios = async () => {
     try {
       const response = await axios.get(`${API_URL}/auth?action=usuarios`);
-      setUsuarios(response.data);
+      const data = response?.data;
+      if (Array.isArray(data)) {
+        setUsuarios(data);
+      } else {
+        setUsuarios([]);
+        setError('No se pudo cargar la lista de usuarios. Puedes escribir tu nombre para intentar acceder.');
+      }
     } catch (err) {
       console.error('Error al cargar usuarios:', err);
       // Fallback: If API fails, allow manual entry by not setting users but stopping loading
