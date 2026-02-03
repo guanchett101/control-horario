@@ -315,28 +315,30 @@ function Dashboard({ user, onLogout }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <Link to="/registro" style={{
               textDecoration: 'none',
-              background: '#1e3c72',
-              color: 'white',
-              padding: '1.25rem',
-              borderRadius: '8px',
+              background: '#fbbf24', // Amarillo vibrante (Amber 400)
+              color: '#1e3a8a', // Azul oscuro para contraste
+              padding: '1.75rem',
+              borderRadius: '16px',
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              transition: 'all 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
+              justifyContent: 'center',
+              gap: '1.25rem',
+              transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              boxShadow: '0 10px 15px -3px rgba(251, 191, 36, 0.3)',
+              border: '2px solid #f59e0b'
             }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 60, 114, 0.2)';
+                e.currentTarget.style.transform = 'scale(1.05) translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(251, 191, 36, 0.4)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
+                e.currentTarget.style.transform = 'scale(1) translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(251, 191, 36, 0.3)';
               }}>
-              <span style={{ fontSize: '1.75rem' }}>⏰</span>
-              <div>
-                <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Registrar Horario</div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>Entrada/Salida</div>
+              <span style={{ fontSize: '2.5rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>⏱️</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: '1.1' }}>REGISTRAR HORARIO</div>
+                <div style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: '600', marginTop: '4px' }}>Fichar Entrada / Salida</div>
               </div>
             </Link>
 
