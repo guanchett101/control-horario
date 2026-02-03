@@ -97,8 +97,9 @@ function RegistroHorario({ user, onLogout }) {
     return `${horas}h ${mins}m`;
   };
 
+  // Un usuario tiene una entrada activa si hay algún registro sin hora_salida
   const registroActual = registrosHoy.find(r => !r.hora_salida);
-  const yaRegistroEntrada = registrosHoy.some(r => !r.hora_salida);
+  const yaRegistroEntrada = !!registroActual;
 
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>

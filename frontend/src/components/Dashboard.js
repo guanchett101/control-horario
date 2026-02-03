@@ -37,7 +37,14 @@ function Dashboard({ user, onLogout }) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const response = await axios.get(`${API_URL}/registros?action=hoy`, {
+      let url = `${API_URL}/registros?action=hoy`;
+
+      // Si NO es admin, solo pedir sus propios registros
+      if (user?.rol !== 'admin') {
+        url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
+      }
+
+      const response = await axios.get(url, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         signal: controller.signal
       });
@@ -405,7 +412,7 @@ function Dashboard({ user, onLogout }) {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>
-              Actividad de Hoy
+              Actividad de {user?.rol === 'admin' ? 'Hoy' : 'Tus Registros de Hoy'}
             </h3>
             {!loading && (
               <button

@@ -63,6 +63,14 @@ function Navbar({ user, onLogout }) {
           </>
         )}
 
+        <Link
+          to="/cambiar-password"
+          style={{ background: isActive('/cambiar-password') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
+          title="Seguridad"
+        >
+          {isMobile ? '🔐' : 'Contraseña'}
+        </Link>
+
         {/* Separador visual en desktop */}
         {!isMobile && <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>}
 

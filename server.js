@@ -11,14 +11,14 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas API
-app.use('/api/empleados', require('./routes/empleados'));
-app.use('/api/registros', require('./routes/registros'));
-app.use('/api/auth', require('./routes/auth'));
+app.all('/api/empleados', require('./api/empleados'));
+app.all('/api/registros', require('./api/registros'));
+app.all('/api/auth', require('./api/auth'));
 
 // Servir frontend en producción
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'frontend/build')));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
   });
