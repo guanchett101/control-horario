@@ -76,7 +76,6 @@ module.exports = async (req, res) => {
     // Obtener registros por empleado y rango de fechas
     if (req.method === 'GET' && (path.startsWith('/empleado/') || action === 'empleado')) {
       const id = action === 'empleado' ? url.searchParams.get('id') : path.split('/')[2];
-      const url = new URL(req.url, `http://${req.headers.host}`);
       const fechaInicio = url.searchParams.get('fechaInicio');
       const fechaFin = url.searchParams.get('fechaFin');
 
