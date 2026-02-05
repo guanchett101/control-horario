@@ -69,6 +69,13 @@ export default function EmpleadosPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validación estricta de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            alert('⚠️ Por favor, introduce un email válido (ejemplo@empresa.com)');
+            return;
+        }
+
         try {
             if (editando) {
                 // Actualizar empleado existente
@@ -265,14 +272,19 @@ export default function EmpleadosPage() {
 
                             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%' }}>
                                 <div className="form-group">
-                                    <label>Email</label>
+                                    <label>Email (Para avisos) *</label>
                                     <input
                                         type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
+                                        required
+                                        placeholder="usuario@empresa.com"
                                         style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                                     />
+                                    <small style={{ color: '#6b7280', fontSize: '0.8rem' }}>
+                                        Imprescindible para enviar notificaciones automáticas.
+                                    </small>
                                 </div>
 
                                 <div className="form-group">
