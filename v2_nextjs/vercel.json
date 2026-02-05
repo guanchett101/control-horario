@@ -1,0 +1,8 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/verificar-fichajes",
+            "schedule": "*/30 7-22 * * *"
+        }
+    ]
+}
