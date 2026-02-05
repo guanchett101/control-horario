@@ -47,6 +47,14 @@ Se creó una nueva estructura de proyecto en la carpeta `v2_nextjs`:
 *   Se cambió el **Root Directory** del proyecto en Vercel a `v2_nextjs`.
 *   Esto permitió un despliegue limpio y exitoso.
 
+### 5. Nuevas Funcionalidades (Control Horario Avanzado)
+*   **Reportes Mejorados:** Se corrigió la lógica de cálculo de "Días Trabajados" para soportar múltiples fichajes por día (turno partido) contando días únicos en lugar de registros brutos.
+*   **Horarios Flexibles:** Se añadió soporte para definir horarios de entrada y salida personalizados para cada empleado.
+    *   Soporte para **Turno Partido** (Mañana y Tarde) con campos opcionales.
+*   **Sistema de Alertas Automáticas (Cron + Email):**
+    *   Se implementó un Cron Job (`/api/cron/verificar-fichajes`) que verifica faltas de asistencia y olvidos de fichaje de salida.
+    *   Se integró **Nodemailer** para el envío de notificaciones automáticas a los empleados vía Gmail SMTP.
+
 ## 📋 Cómo Ejecutar el Proyecto (Versión v2)
 
 ### Desarrollo Local
@@ -62,4 +70,6 @@ El nuevo proyecto utiliza un archivo `.env.local` en la carpeta `v2_nextjs/` con
 ```
 SUPABASE_URL=...
 SUPABASE_KEY=...
+SMTP_EMAIL=...  (Para envío de correos)
+SMTP_PASSWORD=... (Contraseña de aplicación de Google)
 ```
