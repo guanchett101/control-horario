@@ -16,6 +16,7 @@ export default function ReportesPage() {
     const [registros, setRegistros] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingEmpleados, setLoadingEmpleados] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
 
     // Auth Check
     useEffect(() => {
@@ -28,7 +29,7 @@ export default function ReportesPage() {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 setUser(parsedUser);
-                if (parsedUser.rol !== 'admin') {
+                if (parsedUser.rol?.toLowerCase() !== 'admin') {
                     router.push('/'); // Protect Access
                 }
             } catch (e) {
@@ -39,6 +40,13 @@ export default function ReportesPage() {
 
     useEffect(() => {
         if (!user) return;
+        const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        setIsMobile(checkMobile);
+
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
 
         cargarEmpleados();
         // Establecer fechas por defecto (último mes)
@@ -48,6 +56,8 @@ export default function ReportesPage() {
 
         setFechaFin(hoy.toISOString().split('T')[0]);
         setFechaInicio(haceUnMes.toISOString().split('T')[0]);
+
+        return () => window.removeEventListener('resize', handleResize);
     }, [user]);
 
     const cargarEmpleados = async () => {
@@ -135,8 +145,8 @@ export default function ReportesPage() {
 
         registros.forEach(reg => {
             const fecha = new Date(reg.fecha).toLocaleDateString('es-ES');
-            const nombre = `${reg.empleados.nombre} ${reg.empleados.apellido}`;
-            const cargo = reg.empleados.cargo;
+            const nombre = `${reg.empleados?.nombre} ${reg.empleados?.apellido}`;
+            const cargo = reg.empleados?.cargo;
             const entrada = reg.hora_entrada || '-';
             const salida = reg.hora_salida || '-';
             const horas = calcularHoras(reg.hora_entrada, reg.hora_salida).texto;
@@ -163,8 +173,6 @@ export default function ReportesPage() {
     };
 
     const exportarExcel = () => {
-        // (Similar to CSV but HTML logic, keeping simplified for brevity or can implement fully if user needs)
-        // For now reusing the logic from the React component is fine.
         if (registros.length === 0) {
             alert('No hay datos para exportar');
             return;
@@ -202,12 +210,12 @@ export default function ReportesPage() {
               </tr>
             </thead>
             <tbody>
-      `;
+        `;
 
         registros.forEach(reg => {
             const fecha = new Date(reg.fecha).toLocaleDateString('es-ES');
-            const nombre = `${reg.empleados.nombre} ${reg.empleados.apellido}`;
-            const cargo = reg.empleados.cargo;
+            const nombre = `${reg.empleados?.nombre} ${reg.empleados?.apellido}`;
+            const cargo = reg.empleados?.cargo;
             const entrada = reg.hora_entrada || '-';
             const salida = reg.hora_salida || '-';
             const horas = calcularHoras(reg.hora_entrada, reg.hora_salida).texto;
@@ -272,12 +280,11 @@ export default function ReportesPage() {
     const totales = registros.length > 0 ? calcularTotales() : null;
 
     return (
-    return (
-        <div>
+        <div style={{ paddingBottom: '2rem' }}>
             <Navbar user={user} />
 
-            <div className="container">
-                <h2 style={{ marginBottom: '2rem', color: '#111827' }}>📊 Reportes de Horarios</h2>
+            <div className="container" style={{ padding: isMobile ? '1rem' : '2rem' }}>
+                <h2 style={{ marginBottom: '2rem', color: '#111827', fontSize: isMobile ? '1.5rem' : '1.8rem' }}>📊 Reportes de Horarios</h2>
 
                 <div className="card" style={{ padding: '1.75rem', marginBottom: '2rem' }}>
                     <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '600' }}>Filtros de Búsqueda</h3>
@@ -302,7 +309,7 @@ export default function ReportesPage() {
                             )}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                             <div className="form-group">
                                 <label>Fecha Inicio</label>
                                 <input
@@ -324,7 +331,7 @@ export default function ReportesPage() {
                             </div>
                         </div>
 
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                        <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: isMobile ? '100%' : 'auto' }}>
                             {loading ? '🔍 Buscando...' : '🔍 Buscar Registros'}
                         </button>
                     </form>
@@ -333,22 +340,22 @@ export default function ReportesPage() {
                 {registros.length > 0 && totales && (
                     <>
                         {/* Resumen */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                             <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
                                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Días Trabajados</div>
-                                <div style={{ fontSize: '1.75rem', fontWeight: '600' }}>{totales.diasTrabajados}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>{totales.diasTrabajados}</div>
                             </div>
                             <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
                                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Total Horas</div>
-                                <div style={{ fontSize: '1.75rem', fontWeight: '600' }}>{totales.totalHoras}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>{totales.totalHoras}</div>
                             </div>
                             <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
                                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Promedio Diario</div>
-                                <div style={{ fontSize: '1.75rem', fontWeight: '600' }}>{totales.promedioHoras}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>{totales.promedioHoras}</div>
                             </div>
                             <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
                                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Días Incompletos</div>
-                                <div style={{ fontSize: '1.75rem', fontWeight: '600', color: totales.diasIncompletos > 0 ? '#ef4444' : '#111827' }}>{totales.diasIncompletos}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: totales.diasIncompletos > 0 ? '#ef4444' : '#111827' }}>{totales.diasIncompletos}</div>
                             </div>
                         </div>
 
@@ -356,49 +363,85 @@ export default function ReportesPage() {
                         <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
                             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.125rem' }}>Exportar Reporte</h3>
                             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                <button onClick={exportarExcel} className="btn btn-success">📊 Exportar a Excel</button>
-                                <button onClick={exportarCSV} className="btn btn-primary">📄 Exportar a CSV</button>
+                                <button onClick={exportarExcel} className="btn btn-success" style={{ flex: isMobile ? '1 1 100%' : 'initial' }}>📊 Exportar a Excel</button>
+                                <button onClick={exportarCSV} className="btn btn-primary" style={{ flex: isMobile ? '1 1 100%' : 'initial' }}>📄 Exportar a CSV</button>
                             </div>
                         </div>
 
-                        {/* Tabla */}
-                        <div className="card" style={{ padding: '1.75rem' }}>
-                            <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem' }}>Detalle de Registros ({registros.length})</h3>
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Empleado</th>
-                                            <th>Cargo</th>
-                                            <th>Entrada</th>
-                                            <th>Salida</th>
-                                            <th>Horas</th>
-                                            <th>Estado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {registros.map((reg) => (
-                                            <tr key={reg.id}>
-                                                <td>{new Date(reg.fecha).toLocaleDateString('es-ES')}</td>
-                                                <td>{reg.empleados?.nombre} {reg.empleados?.apellido}</td>
-                                                <td>{reg.empleados?.cargo}</td>
-                                                <td style={{ fontFamily: 'monospace' }}>{reg.hora_entrada || '-'}</td>
-                                                <td style={{ fontFamily: 'monospace' }}>{reg.hora_salida || '-'}</td>
-                                                <td style={{ fontFamily: 'monospace', fontWeight: '600' }}>{calcularHoras(reg.hora_entrada, reg.hora_salida).texto}</td>
-                                                <td>
-                                                    {!reg.hora_salida ? (
-                                                        <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.25rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' }}>Incompleto</span>
-                                                    ) : (
-                                                        <span style={{ background: '#d1fae5', color: '#059669', padding: '0.25rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' }}>Completo</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                        {/* Tabla o Tarjetas */}
+                        {isMobile ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem' }}>Detalle de Registros ({registros.length})</h3>
+                                {registros.map((reg) => (
+                                    <div key={reg.id} className="card" style={{ padding: '1rem', marginBottom: 0 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                            <div>
+                                                <div style={{ fontWeight: 'bold', color: '#1f2937' }}>{new Date(reg.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>{reg.empleados?.nombre} {reg.empleados?.apellido}</div>
+                                            </div>
+                                            {!reg.hora_salida ? (
+                                                <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>Incompleto</span>
+                                            ) : (
+                                                <span style={{ background: '#d1fae5', color: '#059669', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>Completo</span>
+                                            )}
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '8px' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>ENTRADA</div>
+                                                <div style={{ fontWeight: '600', fontFamily: 'monospace' }}>{reg.hora_entrada || '-'}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>SALIDA</div>
+                                                <div style={{ fontWeight: '600', fontFamily: 'monospace' }}>{reg.hora_salida || '-'}</div>
+                                            </div>
+                                            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span style={{ fontSize: '0.85rem', color: '#4b5563' }}>Horas Trabajadas:</span>
+                                                <span style={{ fontWeight: '700', color: '#3b82f6' }}>{calcularHoras(reg.hora_entrada, reg.hora_salida).texto}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
+                        ) : (
+                            <div className="card" style={{ padding: '1.75rem' }}>
+                                <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem' }}>Detalle de Registros ({registros.length})</h3>
+                                <div className="table-responsive">
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Empleado</th>
+                                                <th>Cargo</th>
+                                                <th>Entrada</th>
+                                                <th>Salida</th>
+                                                <th>Horas</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {registros.map((reg) => (
+                                                <tr key={reg.id}>
+                                                    <td>{new Date(reg.fecha).toLocaleDateString('es-ES')}</td>
+                                                    <td>{reg.empleados?.nombre} {reg.empleados?.apellido}</td>
+                                                    <td>{reg.empleados?.cargo}</td>
+                                                    <td style={{ fontFamily: 'monospace' }}>{reg.hora_entrada || '-'}</td>
+                                                    <td style={{ fontFamily: 'monospace' }}>{reg.hora_salida || '-'}</td>
+                                                    <td style={{ fontFamily: 'monospace', fontWeight: '600' }}>{calcularHoras(reg.hora_entrada, reg.hora_salida).texto}</td>
+                                                    <td>
+                                                        {!reg.hora_salida ? (
+                                                            <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.25rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' }}>Incompleto</span>
+                                                        ) : (
+                                                            <span style={{ background: '#d1fae5', color: '#059669', padding: '0.25rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' }}>Completo</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
 
