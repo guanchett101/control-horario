@@ -108,28 +108,32 @@ export default function ReportesPage() {
 
     const calcularTotales = () => {
         let totalMinutos = 0;
-        let diasTrabajados = 0;
-        let diasIncompletos = 0;
+        const diasVistos = new Set(); // Usamos un Set para contar días únicos (turno partido = 1 día)
+        let registrosIncompletos = 0;
 
         registros.forEach(reg => {
             if (reg.hora_entrada) {
-                diasTrabajados++;
+                // Guardamos la fecha normalizada
+                const fechaStr = new Date(reg.fecha).toISOString().split('T')[0];
+                diasVistos.add(fechaStr);
+
                 if (reg.hora_salida) {
                     const { minutos } = calcularHoras(reg.hora_entrada, reg.hora_salida);
                     totalMinutos += minutos;
                 } else {
-                    diasIncompletos++;
+                    registrosIncompletos++;
                 }
             }
         });
 
-        const totalHoras = Math.floor(totalMinutos / 60);
-        const totalMins = totalMinutos % 60;
+        const diasTrabajados = diasVistos.size;
+        const totalHorasCalculadas = Math.floor(totalMinutos / 60);
+        const totalMinsCalculados = totalMinutos % 60;
 
         return {
-            totalHoras: `${totalHoras}h ${totalMins}m`,
+            totalHoras: `${totalHorasCalculadas}h ${totalMinsCalculados}m`,
             diasTrabajados,
-            diasIncompletos,
+            diasIncompletos: registrosIncompletos,
             promedioHoras: diasTrabajados > 0 ? `${Math.floor(totalMinutos / diasTrabajados / 60)}h ${Math.floor((totalMinutos / diasTrabajados) % 60)}m` : '-'
         };
     };
