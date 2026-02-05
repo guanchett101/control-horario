@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { enviarAviso } from '@/lib/email';
 
 // Cliente Supabase
 const supabase = createClient(
@@ -40,7 +41,7 @@ export async function GET() {
             incidentes: []
         };
 
-        empleados.forEach(emp => {
+        for (const emp of empleados) {
             // --- TURNO MAÑANA / CONTINUO ---
             const entradaMañana = emp.horario_entrada || '09:00';
             const salidaMañana = emp.horario_salida || '18:00';
@@ -61,12 +62,17 @@ export async function GET() {
 
             // 1. CHEQUEO MAÑANA: Ausencia
             if (minutosActuales > (minutosEntrada1 + 30) && !primerFichaje) {
+                const mensaje = `Hola ${emp.nombre}, son las ${now.toLocaleTimeString()} y no hemos registrado tu entrada de las ${entradaMañana}. Por favor, contacta con administración si es un error.`;
                 reporte.incidentes.push({
                     empleado: `${emp.nombre} ${emp.apellido}`,
                     tipo: 'AUSENCIA_MAÑANA',
-                    mensaje: `Debía entrar a las ${entradaMañana} y no hay fichajes hoy.`,
-                    accion_recomendada: 'Enviar recordatorio entrada.'
+                    mensaje: mensaje,
+                    accion_recomendada: 'Correo enviado.'
                 });
+
+                if (emp.email) {
+                    await enviarAviso(emp.email, '⚠️ Alerta de Asistencia: Entrada Pendiente', mensaje);
+                }
             }
 
             // 2. CHEQUEO MAÑANA: Olvido Salida (si no tiene turno de tarde o si estamos en el hueco del mediodía)
@@ -76,12 +82,17 @@ export async function GET() {
             if (primerFichaje && !primerFichaje.hora_salida) {
                 // Si ya pasó mucho tiempo de su hora de salida teórica
                 if (minutosActuales > (minutosSalida1 + 60)) {
+                    const mensaje = `Hola ${emp.nombre}, parece que olvidaste fichar tu salida de las ${salidaMañana}.`;
                     reporte.incidentes.push({
                         empleado: `${emp.nombre} ${emp.apellido}`,
                         tipo: 'OLVIDO_SALIDA_MAÑANA',
-                        mensaje: `Debía salir a las ${salidaMañana} y sigue abierto.`,
-                        accion_recomendada: 'Enviar recordatorio salida.'
+                        mensaje: mensaje,
+                        accion_recomendada: 'Correo enviado.'
                     });
+
+                    if (emp.email) {
+                        await enviarAviso(emp.email, '⚠️ Recordatorio: Fichar Salida', mensaje);
+                    }
                 }
             }
 
@@ -109,28 +120,38 @@ export async function GET() {
                 if (minutosActuales > (minutosEntrada2 + 30) && !fichajeTarde) {
                     // Solo reportar si ya fichó por la mañana (si no fichó mañana, ya saltó la alarma de ausencia total)
                     if (primerFichaje) {
+                        const mensaje = `Hola ${emp.nombre}, es tu turno de tarde (${entradaTarde}) y no vemos tu fichaje de entrada.`;
                         reporte.incidentes.push({
                             empleado: `${emp.nombre} ${emp.apellido}`,
                             tipo: 'AUSENCIA_TARDE',
-                            mensaje: `Debía volver a las ${entradaTarde} y no ha fichado entrada de tarde.`,
-                            accion_recomendada: 'Enviar recordatorio vuelta tarde.'
+                            mensaje: mensaje,
+                            accion_recomendada: 'Correo enviado.'
                         });
+
+                        if (emp.email) {
+                            await enviarAviso(emp.email, '⚠️ Alerta Tarde: Entrada Pendiente', mensaje);
+                        }
                     }
                 }
 
                 // 4. CHEQUEO TARDE: Olvido Salida
                 if (fichajeTarde && !fichajeTarde.hora_salida) {
                     if (minutosActuales > (minutosSalida2 + 60)) {
+                        const mensaje = `Hola ${emp.nombre}, tu turno de tarde acababa a las ${salidaTarde} y sigues fichado.`;
                         reporte.incidentes.push({
                             empleado: `${emp.nombre} ${emp.apellido}`,
                             tipo: 'OLVIDO_SALIDA_TARDE',
-                            mensaje: `Debía salir a las ${salidaTarde} y sigue abierto.`,
-                            accion_recomendada: 'Enviar recordatorio salida final.'
+                            mensaje: mensaje,
+                            accion_recomendada: 'Correo enviado.'
                         });
+
+                        if (emp.email) {
+                            await enviarAviso(emp.email, '⚠️ Recordatorio: Cerrar Turno Tarde', mensaje);
+                        }
                     }
                 }
             }
-        });
+        }
 
         return NextResponse.json(reporte);
 
