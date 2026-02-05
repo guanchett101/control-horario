@@ -25,11 +25,20 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { nombre, apellido, email, telefono, cargo, fechaIngreso } = body;
+        const { nombre, apellido, email, telefono, cargo, fechaIngreso, horario_entrada, horario_salida } = body;
 
         const { data, error } = await supabase
             .from('empleados')
-            .insert([{ nombre, apellido, email, telefono, cargo, fecha_ingreso: fechaIngreso }])
+            .insert([{
+                nombre,
+                apellido,
+                email,
+                telefono,
+                cargo,
+                fecha_ingreso: fechaIngreso,
+                horario_entrada,
+                horario_salida
+            }])
             .select();
 
         if (error) throw error;

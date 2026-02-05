@@ -21,6 +21,8 @@ export default function EmpleadosPage() {
         telefono: '',
         cargo: '',
         fechaIngreso: new Date().toISOString().split('T')[0],
+        horarioEntrada: '09:00',
+        horarioSalida: '18:00',
         username: '',
         password: '123456'
     });
@@ -73,7 +75,9 @@ export default function EmpleadosPage() {
                     apellido: formData.apellido,
                     email: formData.email,
                     telefono: formData.telefono,
-                    cargo: formData.cargo
+                    cargo: formData.cargo,
+                    horario_entrada: formData.horarioEntrada,
+                    horario_salida: formData.horarioSalida
                 });
                 alert('✅ Empleado actualizado exitosamente');
             } else {
@@ -84,7 +88,9 @@ export default function EmpleadosPage() {
                     email: formData.email,
                     telefono: formData.telefono,
                     cargo: formData.cargo,
-                    fechaIngreso: formData.fechaIngreso
+                    fechaIngreso: formData.fechaIngreso,
+                    horario_entrada: formData.horarioEntrada,
+                    horario_salida: formData.horarioSalida
                 });
 
                 // Crear usuario con contraseña personalizada
@@ -107,6 +113,8 @@ export default function EmpleadosPage() {
                 telefono: '',
                 cargo: '',
                 fechaIngreso: new Date().toISOString().split('T')[0],
+                horarioEntrada: '09:00',
+                horarioSalida: '18:00',
                 username: '',
                 password: '123456'
             });
@@ -132,6 +140,8 @@ export default function EmpleadosPage() {
             telefono: emp.telefono || '',
             cargo: emp.cargo,
             fechaIngreso: emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            horarioEntrada: emp.horario_entrada || '09:00',
+            horarioSalida: emp.horario_salida || '18:00',
             username: '',
             password: '123456'
         });
@@ -149,6 +159,8 @@ export default function EmpleadosPage() {
             telefono: '',
             cargo: '',
             fechaIngreso: new Date().toISOString().split('T')[0],
+            horarioEntrada: '09:00',
+            horarioSalida: '18:00',
             username: '',
             password: '123456'
         });
@@ -275,18 +287,38 @@ export default function EmpleadosPage() {
                                     />
                                 </div>
 
-                                {!editando && (
-                                    <div className="form-group">
-                                        <label>Fecha de Ingreso *</label>
-                                        <input
-                                            type="date"
-                                            name="fechaIngreso"
-                                            value={formData.fechaIngreso}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-                                )}
+                                <div className="form-group">
+                                    <label>Fecha de Ingreso</label>
+                                    <input
+                                        type="date"
+                                        name="fechaIngreso"
+                                        value={formData.fechaIngreso}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%', marginTop: '1rem' }}>
+                                <div className="form-group">
+                                    <label>Horario Habitual (Entrada)</label>
+                                    <input
+                                        type="time"
+                                        name="horarioEntrada"
+                                        value={formData.horarioEntrada}
+                                        onChange={handleChange}
+                                        style={{ fontFamily: 'monospace' }}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Horario Habitual (Salida)</label>
+                                    <input
+                                        type="time"
+                                        name="horarioSalida"
+                                        value={formData.horarioSalida}
+                                        onChange={handleChange}
+                                        style={{ fontFamily: 'monospace' }}
+                                    />
+                                </div>
                             </div>
 
                             {!editando && (
