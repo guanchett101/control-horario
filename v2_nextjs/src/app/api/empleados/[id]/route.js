@@ -21,11 +21,11 @@ export async function PUT(request, { params }) {
     try {
         const { id } = params;
         const body = await request.json();
-        const { nombre, apellido, email, telefono, cargo, horario_entrada, horario_salida } = body;
+        const { nombre, apellido, email, telefono, cargo, horario_entrada, horario_salida, horario_entrada_tarde, horario_salida_tarde } = body;
 
         const { error } = await supabase
             .from('empleados')
-            .update({ nombre, apellido, email, telefono, cargo, horario_entrada, horario_salida })
+            .update({ nombre, apellido, email, telefono, cargo, horario_entrada, horario_salida, horario_entrada_tarde, horario_salida_tarde })
             .eq('id', id);
 
         if (error) throw error;

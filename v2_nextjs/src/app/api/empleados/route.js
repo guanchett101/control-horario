@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { nombre, apellido, email, telefono, cargo, fechaIngreso, horario_entrada, horario_salida } = body;
+        const { nombre, apellido, email, telefono, cargo, fechaIngreso, horario_entrada, horario_salida, horario_entrada_tarde, horario_salida_tarde } = body;
 
         const { data, error } = await supabase
             .from('empleados')
@@ -37,7 +37,9 @@ export async function POST(request) {
                 cargo,
                 fecha_ingreso: fechaIngreso,
                 horario_entrada,
-                horario_salida
+                horario_salida,
+                horario_entrada_tarde,
+                horario_salida_tarde
             }])
             .select();
 

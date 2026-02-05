@@ -23,6 +23,8 @@ export default function EmpleadosPage() {
         fechaIngreso: new Date().toISOString().split('T')[0],
         horarioEntrada: '09:00',
         horarioSalida: '18:00',
+        horarioEntradaTarde: '',
+        horarioSalidaTarde: '',
         username: '',
         password: '123456'
     });
@@ -77,7 +79,9 @@ export default function EmpleadosPage() {
                     telefono: formData.telefono,
                     cargo: formData.cargo,
                     horario_entrada: formData.horarioEntrada,
-                    horario_salida: formData.horarioSalida
+                    horario_salida: formData.horarioSalida,
+                    horario_entrada_tarde: formData.horarioEntradaTarde,
+                    horario_salida_tarde: formData.horarioSalidaTarde
                 });
                 alert('✅ Empleado actualizado exitosamente');
             } else {
@@ -90,7 +94,9 @@ export default function EmpleadosPage() {
                     cargo: formData.cargo,
                     fechaIngreso: formData.fechaIngreso,
                     horario_entrada: formData.horarioEntrada,
-                    horario_salida: formData.horarioSalida
+                    horario_salida: formData.horarioSalida,
+                    horario_entrada_tarde: formData.horarioEntradaTarde,
+                    horario_salida_tarde: formData.horarioSalidaTarde
                 });
 
                 // Crear usuario con contraseña personalizada
@@ -115,6 +121,8 @@ export default function EmpleadosPage() {
                 fechaIngreso: new Date().toISOString().split('T')[0],
                 horarioEntrada: '09:00',
                 horarioSalida: '18:00',
+                horarioEntradaTarde: '',
+                horarioSalidaTarde: '',
                 username: '',
                 password: '123456'
             });
@@ -142,6 +150,8 @@ export default function EmpleadosPage() {
             fechaIngreso: emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             horarioEntrada: emp.horario_entrada || '09:00',
             horarioSalida: emp.horario_salida || '18:00',
+            horarioEntradaTarde: emp.horario_entrada_tarde || '',
+            horarioSalidaTarde: emp.horario_salida_tarde || '',
             username: '',
             password: '123456'
         });
@@ -161,6 +171,8 @@ export default function EmpleadosPage() {
             fechaIngreso: new Date().toISOString().split('T')[0],
             horarioEntrada: '09:00',
             horarioSalida: '18:00',
+            horarioEntradaTarde: '',
+            horarioSalidaTarde: '',
             username: '',
             password: '123456'
         });
@@ -298,26 +310,59 @@ export default function EmpleadosPage() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem', width: '100%', marginTop: '1rem' }}>
-                                <div className="form-group">
-                                    <label>Horario Habitual (Entrada)</label>
-                                    <input
-                                        type="time"
-                                        name="horarioEntrada"
-                                        value={formData.horarioEntrada}
-                                        onChange={handleChange}
-                                        style={{ fontFamily: 'monospace' }}
-                                    />
+                            <h4 style={{ margin: '1.5rem 0 0.5rem', color: '#374151', fontSize: '0.9rem', textTransform: 'uppercase', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>⏰ Configuración de Horario</h4>
+
+                            {/* Turno Mañana */}
+                            <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#6b7280', fontWeight: '600' }}>Turno Mañana / Continuo</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label>Entrada</label>
+                                        <input
+                                            type="time"
+                                            name="horarioEntrada"
+                                            value={formData.horarioEntrada}
+                                            onChange={handleChange}
+                                            style={{ fontFamily: 'monospace' }}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Salida</label>
+                                        <input
+                                            type="time"
+                                            name="horarioSalida"
+                                            value={formData.horarioSalida}
+                                            onChange={handleChange}
+                                            style={{ fontFamily: 'monospace' }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label>Horario Habitual (Salida)</label>
-                                    <input
-                                        type="time"
-                                        name="horarioSalida"
-                                        value={formData.horarioSalida}
-                                        onChange={handleChange}
-                                        style={{ fontFamily: 'monospace' }}
-                                    />
+                            </div>
+
+                            {/* Turno Tarde */}
+                            <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: '#6b7280', fontWeight: '600' }}>Turno Tarde (Opcional)</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label>Entrada</label>
+                                        <input
+                                            type="time"
+                                            name="horarioEntradaTarde"
+                                            value={formData.horarioEntradaTarde}
+                                            onChange={handleChange}
+                                            style={{ fontFamily: 'monospace' }}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Salida</label>
+                                        <input
+                                            type="time"
+                                            name="horarioSalidaTarde"
+                                            value={formData.horarioSalidaTarde}
+                                            onChange={handleChange}
+                                            style={{ fontFamily: 'monospace' }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
