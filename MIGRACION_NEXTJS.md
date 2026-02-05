@@ -55,6 +55,7 @@ Se creó una nueva estructura de proyecto en la carpeta `v2_nextjs`:
 *   **Sistema de Alertas Automáticas (Cron + Email):**
     *   Se implementó un Cron Job (`/api/cron/verificar-fichajes`) que verifica faltas de asistencia y olvidos de fichaje de salida.
     *   Se integró **Nodemailer** para el envío de notificaciones automáticas a los empleados vía Gmail SMTP.
+        *   **Nota Técnica:** Se configuró como `serverExternalPackages` en `next.config.ts` y se usó `require()` dinámico para evitar errores de bundling en el build.
 
 ## ✅ Estado Actual (Verificado)
 *   **Build:** ✅ Exitoso (`npm run build`).
