@@ -41,11 +41,12 @@ Se creó una nueva estructura de proyecto en la carpeta `v2_nextjs`:
 *   Se portaron todos los componentes React (`Login.js`, `Dashboard.js`, etc.) y se adaptaron para funcionar como **Client Components** (`'use client'`).
 *   Se reemplazó `react-router-dom` con el hook `useRouter` nativo de Next.js.
 *   Se migraron los estilos CSS globales y modulares.
+*   Se actualizó el **Metadata** global (`layout.tsx`) para reflejar el nombre de la aplicación.
 
 ### 4. Configuración de Vercel
-*   Se eliminó el archivo `vercel.json` antiguo.
+*   Se eliminó el archivo `vercel.json` antiguo de redirecciones.
+*   Se creó un nuevo `vercel.json` exclusivo para la configuración de Cron Jobs.
 *   Se cambió el **Root Directory** del proyecto en Vercel a `v2_nextjs`.
-*   Esto permitió un despliegue limpio y exitoso.
 
 ### 5. Nuevas Funcionalidades (Control Horario Avanzado)
 *   **Reportes Mejorados:** Se corrigió la lógica de cálculo de "Días Trabajados" para soportar múltiples fichajes por día (turno partido) contando días únicos en lugar de registros brutos.
@@ -54,6 +55,16 @@ Se creó una nueva estructura de proyecto en la carpeta `v2_nextjs`:
 *   **Sistema de Alertas Automáticas (Cron + Email):**
     *   Se implementó un Cron Job (`/api/cron/verificar-fichajes`) que verifica faltas de asistencia y olvidos de fichaje de salida.
     *   Se integró **Nodemailer** para el envío de notificaciones automáticas a los empleados vía Gmail SMTP.
+
+## ✅ Estado Actual (Verificado)
+*   **Build:** ✅ Exitoso (`npm run build`).
+*   **Funcionalidades Clave:**
+    *   Autenticación: ✅ Listo (`/api/auth`).
+    *   Cron Job: ✅ Integrado (`/api/cron/verificar-fichajes`).
+    *   Email: ✅ Configurado (`src/lib/email.js`).
+*   **Siguientes Pasos:**
+    1.  Desplegar el directorio `v2_nextjs` en Vercel.
+    2.  Configurar las **Variables de Entorno** en el dashboard de Vercel (copiar las de `.env.local`).
 
 ## 📋 Cómo Ejecutar el Proyecto (Versión v2)
 
@@ -72,4 +83,5 @@ SUPABASE_URL=...
 SUPABASE_KEY=...
 SMTP_EMAIL=...  (Para envío de correos)
 SMTP_PASSWORD=... (Contraseña de aplicación de Google)
+JWT_SECRET=... (Para firma de tokens, opcional en dev, recomendado en prod)
 ```
