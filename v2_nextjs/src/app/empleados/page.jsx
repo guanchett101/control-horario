@@ -21,7 +21,8 @@ export default function EmpleadosPage() {
         telefono: '',
         cargo: '',
         fechaIngreso: new Date().toISOString().split('T')[0],
-        username: ''
+        username: '',
+        password: '123456'
     });
 
     useEffect(() => {
@@ -86,26 +87,15 @@ export default function EmpleadosPage() {
                     fechaIngreso: formData.fechaIngreso
                 });
 
-                // Crear usuario con contraseña por defecto "123456"
-                await axios.post(`${API_URL}/auth`, {
-                    action: 'register', // Using single route, passing action in body or param, but let's stick to param for consistency or body if modified. 
-                    // Wait, the API route for auth handles POST with action param.
-                    // Let's check how we implemented src/app/api/auth/route.js
-                }, {
-                    params: { action: 'register' }
-                });
-
-                // Actually, let's double check the auth api call structure.
-                // In previous steps we saw api/auth/route.js handles POST based on ?action=..
-                // So we should pass query param. 
+                // Crear usuario con contraseña personalizada
                 await axios.post(`${API_URL}/auth?action=register`, {
                     empleadoId: empleadoResponse.data.id,
                     username: formData.username,
-                    password: '123456',
+                    password: formData.password || '123456',
                     rol: 'empleado'
                 });
 
-                alert('✅ Empleado creado exitosamente\n\n📋 Credenciales:\nUsuario: ' + formData.username + '\nContraseña: 123456\n\n⚠️ El empleado debe cambiar su contraseña al entrar');
+                alert('✅ Empleado creado exitosamente\n\n📋 Credenciales:\nUsuario: ' + formData.username + '\nContraseña: ' + (formData.password || '123456') + '\n\n⚠️ El empleado debe cambiar su contraseña al entrar');
             }
 
             setShowForm(false);
@@ -117,7 +107,8 @@ export default function EmpleadosPage() {
                 telefono: '',
                 cargo: '',
                 fechaIngreso: new Date().toISOString().split('T')[0],
-                username: ''
+                username: '',
+                password: '123456'
             });
             cargarEmpleados();
         } catch (error) {
@@ -141,7 +132,8 @@ export default function EmpleadosPage() {
             telefono: emp.telefono || '',
             cargo: emp.cargo,
             fechaIngreso: emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            username: ''
+            username: '',
+            password: '123456'
         });
         setShowForm(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -157,7 +149,8 @@ export default function EmpleadosPage() {
             telefono: '',
             cargo: '',
             fechaIngreso: new Date().toISOString().split('T')[0],
-            username: ''
+            username: '',
+            password: '123456'
         });
     };
 
@@ -313,8 +306,21 @@ export default function EmpleadosPage() {
                                             placeholder="Ej: juan.perez"
                                             required
                                         />
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: '1rem' }}>
+                                        <label>Contraseña Inicial *</label>
+                                        <input
+                                            type="text"
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            placeholder="Por defecto: 123456"
+                                            required
+                                            style={{ fontFamily: 'monospace' }}
+                                        />
                                         <small style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
-                                            La contraseña será automáticamente: <strong>123456</strong>
+                                            Puedes dejarla como <strong>123456</strong> o establecer una personalizada.
                                         </small>
                                     </div>
 
@@ -326,7 +332,7 @@ export default function EmpleadosPage() {
                                         marginTop: '1rem'
                                     }}>
                                         <div style={{ fontSize: '0.9rem', color: '#92400e' }}>
-                                            ⚠️ <strong>Importante:</strong> El empleado recibirá la contraseña <strong>123456</strong> y debe cambiarla al entrar por primera vez.
+                                            ⚠️ <strong>Importante:</strong> Comunica estas credenciales al empleado. Se recomienda que cambie su contraseña al ingresar.
                                         </div>
                                     </div>
                                 </>
