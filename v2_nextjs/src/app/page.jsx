@@ -219,32 +219,72 @@ export default function Dashboard() {
 
                 {/* Acciones Rápidas */}
                 <div className="card" style={{ padding: '1.75rem', marginBottom: '2rem' }}>
-                    <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600' }}>Acciones Rápidas</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                        <Link href="/registro" style={{
-                            textDecoration: 'none',
-                            background: '#fbbf24',
-                            color: '#1e3a8a',
-                            padding: '1.75rem',
-                            borderRadius: '16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '1.25rem',
-                            fontWeight: 'bold',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}>
-                            <span style={{ fontSize: '2rem' }}>⏱️</span>
-                            <div>FICHAR</div>
-                        </Link>
+                    <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
+                        {user?.rol === 'admin' ? 'Panel de Administración' : 'Acciones Rápidas'}
+                    </h3>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                        {/* BOTÓN FICHAR - SOLO PARA NO ADMINS */}
+                        {user?.rol !== 'admin' && (
+                            <Link href="/registro" style={{
+                                textDecoration: 'none',
+                                background: '#fbbf24',
+                                color: '#1e3a8a',
+                                padding: '1.75rem',
+                                borderRadius: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '1.25rem',
+                                fontWeight: 'bold',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                fontSize: '1.2rem',
+                                transition: 'transform 0.2s'
+                            }}>
+                                <span style={{ fontSize: '2rem' }}>⏱️</span>
+                                <div>FICHAR</div>
+                            </Link>
+                        )}
+
+                        {/* BOTONES ADMIN - REEMPLAZAN AL DE FICHAR */}
                         {user?.rol === 'admin' && (
                             <>
-                                <Link href="/empleados" className="btn btn-success" style={{ height: '100%', fontSize: '1.1rem', textDecoration: 'none' }}>
-                                    👥 Empleados
+                                <Link href="/empleados" style={{
+                                    textDecoration: 'none',
+                                    background: '#10b981',
+                                    color: 'white',
+                                    padding: '1.75rem',
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '1.25rem',
+                                    fontWeight: 'bold',
+                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                    fontSize: '1.1rem',
+                                    transition: 'transform 0.2s'
+                                }}>
+                                    <span style={{ fontSize: '2rem' }}>👥</span>
+                                    <div>GESTIONAR USUARIOS</div>
                                 </Link>
-                                <Link href="/reportes" className="btn btn-primary" style={{ height: '100%', fontSize: '1.1rem', textDecoration: 'none' }}>
-                                    📊 Reportes
+
+                                <Link href="/reportes" style={{
+                                    textDecoration: 'none',
+                                    background: '#3b82f6',
+                                    color: 'white',
+                                    padding: '1.75rem',
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '1.25rem',
+                                    fontWeight: 'bold',
+                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                    fontSize: '1.1rem',
+                                    transition: 'transform 0.2s'
+                                }}>
+                                    <span style={{ fontSize: '2rem' }}>📊</span>
+                                    <div>VER REPORTES</div>
                                 </Link>
                             </>
                         )}

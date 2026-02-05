@@ -272,7 +272,8 @@ export default function ReportesPage() {
     const totales = registros.length > 0 ? calcularTotales() : null;
 
     return (
-        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    return (
+        <div>
             <Navbar user={user} />
 
             <div className="container">
@@ -380,8 +381,8 @@ export default function ReportesPage() {
                                         {registros.map((reg) => (
                                             <tr key={reg.id}>
                                                 <td>{new Date(reg.fecha).toLocaleDateString('es-ES')}</td>
-                                                <td>{reg.empleados.nombre} {reg.empleados.apellido}</td>
-                                                <td>{reg.empleados.cargo}</td>
+                                                <td>{reg.empleados?.nombre} {reg.empleados?.apellido}</td>
+                                                <td>{reg.empleados?.cargo}</td>
                                                 <td style={{ fontFamily: 'monospace' }}>{reg.hora_entrada || '-'}</td>
                                                 <td style={{ fontFamily: 'monospace' }}>{reg.hora_salida || '-'}</td>
                                                 <td style={{ fontFamily: 'monospace', fontWeight: '600' }}>{calcularHoras(reg.hora_entrada, reg.hora_salida).texto}</td>
