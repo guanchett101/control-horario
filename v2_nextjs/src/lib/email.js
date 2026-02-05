@@ -1,5 +1,3 @@
-import nodemailer from 'nodemailer';
-
 /**
  * Envia un correo electrónico utilizando Nodemailer y Gmail.
  * @param {string} to - Dirección de correo del destinatario.
@@ -14,6 +12,9 @@ export async function enviarAviso(to, subject, html) {
     }
 
     try {
+        // Importación dinámica para evitar problemas con el bundler
+        const nodemailer = (await import('nodemailer')).default;
+
         // Configurar el "transportador" de Gmail
         const transporter = nodemailer.createTransport({
             service: 'gmail',
