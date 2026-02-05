@@ -1,5 +1,7 @@
+
 /**
  * Envia un correo electrónico utilizando Nodemailer y Gmail.
+ * Este archivo SOLO debe usarse en rutas del servidor (API routes).
  * @param {string} to - Dirección de correo del destinatario.
  * @param {string} subject - Asunto del correo.
  * @param {string} html - Contenido del correo en formato HTML.
@@ -12,7 +14,7 @@ export async function enviarAviso(to, subject, html) {
     }
 
     try {
-        // Importación dinámica para evitar problemas con el bundler
+        // Importación dinámica estándar (ahora que usamos Nodemailer v6.9 compatible)
         const nodemailer = (await import('nodemailer')).default;
 
         // Configurar el "transportador" de Gmail
