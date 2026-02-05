@@ -10,7 +10,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    serverComponentsExternalPackages: ['nodemailer', 'bcryptjs']
+    serverComponentsExternalPackages: ['bcryptjs']
   }
 };
 
