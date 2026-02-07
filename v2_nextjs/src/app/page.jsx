@@ -11,14 +11,18 @@ export default function Dashboard() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [registrosHoy, setRegistrosHoy] = useState([]);
-    const [loading, setLoading] = useState(true); // Start loading true
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
     const [horaActual, setHoraActual] = useState(new Date());
-    const [isMobile, setIsMobile] = useState(null); // null hasta que se detecte
-    const [isReady, setIsReady] = useState(false); // Controla cuando mostrar contenido
+    const [isMobile, setIsMobile] = useState(null);
+    const [isReady, setIsReady] = useState(false);
+    const [stats, setStats] = useState({
+        totalEmpleados: 0,
+        presentes: 0,
+        ausentes: 0,
+        salieron: 0
+    });
 
-    // Authentication Check
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
@@ -34,64 +38,61 @@ export default function Dashboard() {
         }
     }, [router]);
 
-    // Load Data only if user is set
     useEffect(() => {
         if (!user) return;
 
-        // Detectar si es móvil INMEDIATAMENTE
         const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         setIsMobile(checkMobile);
-        setIsReady(true); // Marcar como listo para mostrar
+        setIsReady(true);
 
         const interval = setInterval(() => setHoraActual(new Date()), 1000);
+        cargarDatos();
 
-        // Cargar registros
-        cargarRegistrosHoy();
-
-        return () => {
-            clearInterval(interval);
-        };
+        return () => clearInterval(interval);
     }, [user]);
 
-    const cargarRegistrosHoy = async () => {
+    const cargarDatos = async () => {
         try {
             const token = localStorage.getItem('token');
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
-
             let url = `${API_URL}/registros?action=hoy`;
 
-            // Si NO es admin, solo pedir sus propios registros
             if (user?.rol !== 'admin') {
                 url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
             }
 
             const response = await axios.get(url, {
-                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                signal: controller.signal
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
             });
 
-            clearTimeout(timeoutId);
-            setRegistrosHoy(Array.isArray(response.data) ? response.data : []);
+            const registros = Array.isArray(response.data) ? response.data : [];
+            setRegistrosHoy(registros);
+
+            // Calcular estadísticas
+            if (user?.rol === 'admin') {
+                const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
+                const salieron = registros.filter(r => r.hora_salida).length;
+                
+                // Obtener total de empleados
+                const empResponse = await axios.get(`${API_URL}/empleados`);
+                const totalEmpleados = empResponse.data.length;
+                
+                setStats({
+                    totalEmpleados,
+                    presentes,
+                    ausentes: totalEmpleados - presentes - salieron,
+                    salieron
+                });
+            }
+
             setError(null);
-            setDebugInfo(null);
         } catch (error) {
-            console.error('Error al cargar registros:', error);
-            if (error.response?.data) {
-                setDebugInfo(error.response.data);
-            }
-            if (error.name !== 'CanceledError') { // Axios cancel uses this name
-                setError('Error cargando datos. Revisa tu conexión.');
-            }
+            console.error('Error al cargar datos:', error);
+            setError('Error cargando datos');
             setRegistrosHoy([]);
         } finally {
             setLoading(false);
         }
     };
-
-    const empleadosPresentes = registrosHoy.filter(r => r.hora_entrada && !r.hora_salida).length;
-    const totalRegistros = registrosHoy.length;
-    const empleadosSalieron = registrosHoy.filter(r => r.hora_salida).length;
 
     const formatearHora = (fecha) => {
         const pad = (n) => n.toString().padStart(2, '0');
@@ -129,391 +130,732 @@ export default function Dashboard() {
         );
     }
 
-    return (
-        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', overflowX: 'hidden' }}>
-            <Navbar user={user} />
+    // VISTA PARA EMPLEADOS (NO ADMIN)
+    if (user?.rol !== 'admin') {
+        return (
+            <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+                <Navbar user={user} />
+                <div className="container" style={{
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    padding: isMobile ? '0.75rem' : '1.5rem'
+                }}>
+                    {/* Header con reloj */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+                        borderRadius: '8px',
+                        padding: isMobile ? '1.5rem' : '2rem',
+                        color: 'white',
+                        marginBottom: '1.5rem',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            textAlign: isMobile ? 'center' : 'left',
+                            gap: '1rem'
+                        }}>
+                            <div>
+                                <h1 style={{ margin: '0 0 0.5rem 0', fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: '700' }}>
+                                    Hola, {user?.nombre || 'Usuario'}
+                                </h1>
+                                <p style={{ margin: 0, opacity: 0.9, fontSize: '0.9rem' }}>
+                                    {formatearFecha(horaActual)}
+                                </p>
+                            </div>
+                            <div style={{ textAlign: isMobile ? 'center' : 'right' }}>
+                                <div style={{ fontSize: isMobile ? '2.5rem' : '3rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace' }}>
+                                    {formatearHora(horaActual)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    {/* Botón Fichar Grande */}
+                    <Link href="/registro" style={{
+                        textDecoration: 'none',
+                        display: 'block',
+                        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                        color: '#1e3a8a',
+                        padding: isMobile ? '2rem' : '3rem',
+                        borderRadius: '12px',
+                        textAlign: 'center',
+                        fontWeight: '700',
+                        fontSize: isMobile ? '1.5rem' : '2rem',
+                        boxShadow: '0 8px 16px rgba(251, 191, 36, 0.3)',
+                        marginBottom: '1.5rem',
+                        transition: 'transform 0.2s'
+                    }}>
+                        <div style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: '0.5rem' }}>⏱️</div>
+                        REGISTRAR HORARIO
+                    </Link>
+
+                    {/* Registros del día */}
+                    <div className="card" style={{ padding: isMobile ? '1.5rem' : '2rem' }}>
+                        <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '700', color: '#111827' }}>
+                            📋 Tus Registros de Hoy
+                        </h3>
+                        {loading ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Cargando...</div>
+                        ) : registrosHoy.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
+                                <p style={{ fontSize: '1.1rem', margin: 0 }}>No hay registros hoy</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {registrosHoy.map(r => (
+                                    <div key={r.id} style={{ 
+                                        padding: '1.5rem', 
+                                        background: '#f8fafc', 
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                            <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: '600' }}>
+                                                {new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                            </span>
+                                            <span style={{
+                                                background: r.hora_salida ? '#fee2e2' : '#d1fae5',
+                                                color: r.hora_salida ? '#991b1b' : '#065f46',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '12px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '600'
+                                            }}>
+                                                {r.hora_salida ? 'COMPLETADO' : 'EN CURSO'}
+                                            </span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>Entrada</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669', fontFamily: 'monospace' }}>
+                                                    {r.hora_entrada}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>Salida</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: r.hora_salida ? '#dc2626' : '#d1d5db', fontFamily: 'monospace' }}>
+                                                    {r.hora_salida || '--:--'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // VISTA PARA ADMIN - DASHBOARD PROFESIONAL
+    return (
+        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+            <Navbar user={user} />
+            
             <div className="container" style={{
-                maxWidth: '1200px',
+                maxWidth: '1400px',
                 margin: '0 auto',
-                padding: isMobile ? '0.75rem' : '1.5rem',
-                boxSizing: 'border-box',
-                width: '100%',
-                overflowX: 'hidden'
+                padding: isMobile ? '0.75rem' : '1.5rem'
             }}>
-                {/* Header con reloj */}
+                {/* Header Profesional */}
                 <div style={{
                     background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-                    borderRadius: '4px',
-                    padding: isMobile ? '1rem' : '1.5rem',
+                    borderRadius: '12px',
+                    padding: isMobile ? '1.5rem' : '2.5rem',
                     color: 'white',
-                    marginBottom: '1rem',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    marginBottom: '2rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                 }}>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexDirection: isMobile ? 'column' : 'row',
-                        textAlign: isMobile ? 'center' : 'left',
-                        gap: '0.75rem'
+                        gap: '1.5rem'
                     }}>
-                        <div>
-                            <h1 style={{ margin: '0 0 0.25rem 0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: '600' }}>
-                                Hola, {user?.nombre || 'Usuario'}
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                Panel de Administración
+                            </div>
+                            <h1 style={{ margin: '0 0 0.5rem 0', fontSize: isMobile ? '1.75rem' : '2.5rem', fontWeight: '700' }}>
+                                Bienvenido, {user?.nombre}
                             </h1>
-                            <p style={{ margin: 0, opacity: 0.9, fontSize: '0.8rem' }}>
+                            <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem' }}>
                                 {formatearFecha(horaActual)}
                             </p>
                         </div>
-                        <div style={{ textAlign: isMobile ? 'center' : 'right' }}>
-                            <div style={{ fontSize: isMobile ? '1.75rem' : '2rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace' }}>
+                        <div style={{ 
+                            textAlign: 'center',
+                            background: 'rgba(255,255,255,0.1)',
+                            backdropFilter: 'blur(10px)',
+                            padding: '1.5rem 2rem',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.9, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                Hora Actual
+                            </div>
+                            <div style={{ fontSize: isMobile ? '2.5rem' : '3.5rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace' }}>
                                 {formatearHora(horaActual)}
                             </div>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.9, marginTop: '0.25rem', textTransform: 'uppercase' }}>
-                                {user?.rol === 'admin' ? 'Administrador' : 'Empleado'}
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Estadísticas */}
-                {error && (
-                    <div className="fade-in" style={{
-                        background: 'rgba(254, 242, 242, 0.9)',
-                        backdropFilter: 'blur(8px)',
-                        border: '1px solid #fecaca',
-                        borderRadius: '16px',
-                        padding: '1.25rem',
-                        marginBottom: '1.5rem',
-                        color: '#991b1b',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                    }}>
-                        <strong>{error}</strong>
-                        <button
-                            onClick={() => {
-                                setLoading(true);
-                                setError(null);
-                                cargarRegistrosHoy();
-                            }}
-                            className="btn btn-danger"
-                            style={{ alignSelf: 'flex-end' }}
-                        >
-                            🔄 Reintentar
-                        </button>
-                    </div>
-                )}
-
-                {/* Stats Grid */}
+                {/* Estadísticas en Cards */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-                    gap: '0.75rem',
-                    marginBottom: '1rem',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+                    gap: '1.5rem',
+                    marginBottom: '2rem'
                 }}>
-                    <div className="card" style={{ 
-                        padding: '1rem', 
-                        marginBottom: 0, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.75rem',
-                        borderRadius: '4px',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb'
+                    {/* Card Total Empleados */}
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
                     }}>
-                        <div style={{ 
-                            fontSize: '1.25rem', 
-                            background: '#10b981', 
-                            color: 'white', 
-                            width: 36, 
-                            height: 36, 
-                            minWidth: 36,
-                            borderRadius: '4px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center' 
-                        }}>✓</div>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Presentes</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{empleadosPresentes}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.5rem'
+                            }}>
+                                👥
+                            </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: '500' }}>
+                            Total Empleados
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#111827', lineHeight: 1 }}>
+                            {stats.totalEmpleados}
                         </div>
                     </div>
 
-                    <div className="card" style={{ 
-                        padding: '1rem', 
-                        marginBottom: 0, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.75rem',
-                        borderRadius: '4px',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb'
+                    {/* Card Presentes */}
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
                     }}>
-                        <div style={{ 
-                            fontSize: '1.25rem', 
-                            background: '#ef4444', 
-                            color: 'white', 
-                            width: 36, 
-                            height: 36, 
-                            minWidth: 36,
-                            borderRadius: '4px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center' 
-                        }}>←</div>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Salieron</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{empleadosSalieron}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.5rem'
+                            }}>
+                                ✓
+                            </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: '500' }}>
+                            Presentes Ahora
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#10b981', lineHeight: 1 }}>
+                            {stats.presentes}
                         </div>
                     </div>
 
-                    <div className="card" style={{ 
-                        padding: '1rem', 
-                        marginBottom: 0, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.75rem',
-                        borderRadius: '4px',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb'
+                    {/* Card Ausentes */}
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
                     }}>
-                        <div style={{ 
-                            fontSize: '1.25rem', 
-                            background: '#3b82f6', 
-                            color: 'white', 
-                            width: 36, 
-                            height: 36, 
-                            minWidth: 36,
-                            borderRadius: '4px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center' 
-                        }}>#</div>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Total Hoy</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{totalRegistros}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.5rem'
+                            }}>
+                                ⏸
+                            </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: '500' }}>
+                            Sin Fichar
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#f59e0b', lineHeight: 1 }}>
+                            {stats.ausentes}
+                        </div>
+                    </div>
+
+                    {/* Card Salieron */}
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.5rem'
+                            }}>
+                                ←
+                            </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: '500' }}>
+                            Ya Salieron
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#ef4444', lineHeight: 1 }}>
+                            {stats.salieron}
                         </div>
                     </div>
                 </div>
 
-                {/* Acciones Rápidas */}
-                <div className="card" style={{ 
-                    padding: isMobile ? '1rem' : '1.25rem', 
-                    marginBottom: '1rem',
-                    borderRadius: '4px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                {/* Acciones Rápidas - Grid Profesional */}
+                <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: isMobile ? '1.5rem' : '2rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                     border: '1px solid #e5e7eb',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    marginBottom: '2rem'
                 }}>
                     <h3 style={{ 
-                        margin: '0 0 0.75rem 0', 
-                        fontSize: isMobile ? '0.9rem' : '1rem', 
-                        fontWeight: '600',
-                        color: '#374151'
+                        margin: '0 0 1.5rem 0', 
+                        fontSize: '1.25rem', 
+                        fontWeight: '700',
+                        color: '#111827',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
                     }}>
-                        {user?.rol === 'admin' ? 'Panel de Administración' : 'Acciones Rápidas'}
+                        <span>⚡</span> Acciones Rápidas
                     </h3>
 
                     <div style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
-                        gap: '0.75rem',
-                        width: '100%'
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
+                        gap: '1.5rem'
                     }}>
-                        {/* BOTÓN FICHAR - SOLO PARA NO ADMINS */}
-                        {user?.rol !== 'admin' && (
-                            <Link href="/registro" style={{
-                                textDecoration: 'none',
-                                background: '#fbbf24',
-                                color: '#1e3a8a',
-                                padding: '1rem',
-                                borderRadius: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.75rem',
-                                fontWeight: '600',
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                fontSize: '0.9rem',
-                                transition: 'transform 0.2s'
-                            }}>
-                                <span style={{ fontSize: '1.5rem' }}>⏱️</span>
-                                <div>{isMobile ? 'FICHAR' : 'REGISTRAR HORARIO'}</div>
-                            </Link>
-                        )}
+                        {/* Gestionar Empleados */}
+                        <Link href="/empleados" style={{
+                            textDecoration: 'none',
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: 'white',
+                            padding: '2rem',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            fontSize: '1.1rem'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                        }}>
+                            <div style={{ fontSize: '3rem' }}>👥</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.1rem', fontWeight: '700' }}>Gestionar Empleados</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '0.25rem' }}>
+                                    Crear, editar y administrar
+                                </div>
+                            </div>
+                        </Link>
 
-                        {/* BOTONES ADMIN */}
-                        {user?.rol === 'admin' && (
-                            <>
-                                <Link href="/empleados" style={{
-                                    textDecoration: 'none',
-                                    background: '#10b981',
-                                    color: 'white',
-                                    padding: '1rem',
-                                    borderRadius: '4px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.75rem',
-                                    fontWeight: '600',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                    fontSize: '0.9rem',
-                                    transition: 'transform 0.2s'
-                                }}>
-                                    <span style={{ fontSize: '1.5rem' }}>👥</span>
-                                    <div>{isMobile ? 'EMPLEADOS' : 'GESTIONAR USUARIOS'}</div>
-                                </Link>
+                        {/* Ver Reportes */}
+                        <Link href="/reportes" style={{
+                            textDecoration: 'none',
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            color: 'white',
+                            padding: '2rem',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            fontSize: '1.1rem'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                        }}>
+                            <div style={{ fontSize: '3rem' }}>📊</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.1rem', fontWeight: '700' }}>Ver Reportes</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '0.25rem' }}>
+                                    Análisis y estadísticas
+                                </div>
+                            </div>
+                        </Link>
 
-                                <Link href="/reportes" style={{
-                                    textDecoration: 'none',
-                                    background: '#3b82f6',
-                                    color: 'white',
-                                    padding: '1rem',
-                                    borderRadius: '4px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.75rem',
-                                    fontWeight: '600',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                    fontSize: '0.9rem',
-                                    transition: 'transform 0.2s'
-                                }}>
-                                    <span style={{ fontSize: '1.5rem' }}>📊</span>
-                                    <div>{isMobile ? 'REPORTES' : 'VER REPORTES'}</div>
-                                </Link>
-                            </>
-                        )}
+                        {/* Perfiles de Turno */}
+                        <Link href="/perfiles-turno" style={{
+                            textDecoration: 'none',
+                            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                            color: 'white',
+                            padding: '2rem',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            fontSize: '1.1rem'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(139, 92, 246, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+                        }}>
+                            <div style={{ fontSize: '3rem' }}>⏰</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.1rem', fontWeight: '700' }}>Perfiles de Turno</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '0.25rem' }}>
+                                    Configurar horarios
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* Fila adicional de acciones */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
+                        gap: '1.5rem',
+                        marginTop: '1.5rem'
+                    }}>
+                        {/* Registro Manual */}
+                        <Link href="/registro" style={{
+                            textDecoration: 'none',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            color: 'white',
+                            padding: '1.5rem',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                        }}>
+                            <div style={{ fontSize: '2.5rem' }}>⏱️</div>
+                            <div>
+                                <div style={{ fontSize: '1rem', fontWeight: '700' }}>Registro Manual</div>
+                                <div style={{ fontSize: '0.8rem', opacity: 0.9, marginTop: '0.15rem' }}>
+                                    Fichar entrada/salida
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Personalización */}
+                        <Link href="/visual" style={{
+                            textDecoration: 'none',
+                            background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                            color: 'white',
+                            padding: '1.5rem',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(236, 72, 153, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.3)';
+                        }}>
+                            <div style={{ fontSize: '2.5rem' }}>🎨</div>
+                            <div>
+                                <div style={{ fontSize: '1rem', fontWeight: '700' }}>Personalización</div>
+                                <div style={{ fontSize: '0.8rem', opacity: 0.9, marginTop: '0.15rem' }}>
+                                    Ajustes visuales
+                                </div>
+                            </div>
+                        </Link>
                     </div>
                 </div>
 
-                {/* Lista Registros */}
-                <div className="card" style={{ padding: isMobile ? '1.25rem' : '2rem' }}>
+                {/* Actividad Reciente */}
+                <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: isMobile ? '1.5rem' : '2rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                    border: '1px solid #e5e7eb'
+                }}>
                     <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
                         alignItems: 'center', 
-                        marginBottom: '1.5rem',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem'
+                        marginBottom: '1.5rem'
                     }}>
                         <h3 style={{ 
                             margin: 0, 
-                            fontSize: isMobile ? '1rem' : '1.25rem', 
-                            fontWeight: '800' 
+                            fontSize: '1.25rem', 
+                            fontWeight: '700',
+                            color: '#111827',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                         }}>
-                            {user?.rol === 'admin' ? '📋 Actividad de Hoy' : '📋 Tus Registros de Hoy'}
+                            <span>📋</span> Actividad de Hoy
                         </h3>
                         <button 
-                            onClick={() => { setLoading(true); cargarRegistrosHoy(); }} 
+                            onClick={() => { setLoading(true); cargarDatos(); }} 
                             style={{ 
-                                background: 'transparent', 
+                                background: '#f3f4f6', 
                                 border: 'none', 
                                 cursor: 'pointer', 
-                                fontSize: isMobile ? '1rem' : '1.2rem',
-                                padding: '0.25rem'
+                                fontSize: '1.2rem',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '8px',
+                                transition: 'background 0.2s'
                             }}
-                        >🔄</button>
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                        >
+                            🔄
+                        </button>
                     </div>
 
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: isMobile ? '1.5rem' : '2rem' }}>Cargando...</div>
+                        <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+                            <div style={{ 
+                                width: '48px', 
+                                height: '48px', 
+                                border: '4px solid #e5e7eb', 
+                                borderTop: '4px solid #3b82f6',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite',
+                                margin: '0 auto 1rem'
+                            }}></div>
+                            Cargando actividad...
+                        </div>
                     ) : registrosHoy.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: isMobile ? '1.5rem' : '2rem', color: '#9ca3af' }}>
-                            <div style={{ fontSize: isMobile ? '2.5rem' : '3rem', marginBottom: '0.5rem', opacity: 0.5 }}>🍃</div>
-                            <p style={{ fontSize: isMobile ? '0.9rem' : '1rem', margin: 0 }}>No hay registros hoy.</p>
+                        <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af' }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
+                            <p style={{ fontSize: '1.1rem', margin: 0, fontWeight: '500', color: '#6b7280' }}>
+                                No hay actividad registrada hoy
+                            </p>
+                            <p style={{ fontSize: '0.9rem', margin: '0.5rem 0 0 0', color: '#9ca3af' }}>
+                                Los fichajes aparecerán aquí en tiempo real
+                            </p>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.5rem' : '0.75rem' }}>
-                            {registrosHoy.map(r => (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            {registrosHoy.slice(0, 10).map(r => (
                                 <div key={r.id} style={{ 
                                     display: 'flex', 
                                     justifyContent: 'space-between', 
-                                    padding: isMobile ? '0.75rem' : '1rem', 
-                                    background: '#f8fafc', 
-                                    borderRadius: isMobile ? '10px' : '12px', 
                                     alignItems: 'center',
-                                    gap: isMobile ? '0.5rem' : '1rem',
-                                    flexWrap: isMobile ? 'wrap' : 'nowrap'
+                                    padding: '1.25rem', 
+                                    background: '#f8fafc', 
+                                    borderRadius: '10px',
+                                    border: '1px solid #e5e7eb',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = '#f1f5f9';
+                                    e.currentTarget.style.borderColor = '#cbd5e1';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#f8fafc';
+                                    e.currentTarget.style.borderColor = '#e5e7eb';
                                 }}>
-                                    <div style={{ display: 'flex', gap: isMobile ? '0.75rem' : '1rem', alignItems: 'center', flex: 1, minWidth: isMobile ? '100%' : 'auto' }}>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
                                         <div style={{ 
-                                            width: isMobile ? 36 : 40, 
-                                            height: isMobile ? 36 : 40, 
-                                            minWidth: isMobile ? 36 : 40,
-                                            borderRadius: '50%', 
-                                            background: r.hora_salida ? '#ef4444' : '#10b981', 
+                                            width: 48, 
+                                            height: 48, 
+                                            minWidth: 48,
+                                            borderRadius: '12px', 
+                                            background: r.hora_salida 
+                                                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' 
+                                                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
                                             display: 'flex', 
                                             alignItems: 'center', 
                                             justifyContent: 'center', 
-                                            fontWeight: 'bold',
+                                            fontWeight: '700',
                                             color: 'white',
-                                            fontSize: isMobile ? '0.75rem' : '0.9rem'
+                                            fontSize: '1rem',
+                                            boxShadow: r.hora_salida 
+                                                ? '0 4px 12px rgba(239, 68, 68, 0.3)' 
+                                                : '0 4px 12px rgba(16, 185, 129, 0.3)'
                                         }}>
                                             {r.empleados?.nombre?.[0]}{r.empleados?.apellido?.[0]}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ 
-                                                fontWeight: 'bold', 
-                                                fontSize: isMobile ? '0.9rem' : '1rem',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
+                                                fontWeight: '600', 
+                                                fontSize: '1rem',
+                                                color: '#111827',
+                                                marginBottom: '0.25rem'
                                             }}>
                                                 {r.empleados?.nombre} {r.empleados?.apellido}
                                             </div>
                                             <div style={{ 
-                                                fontSize: isMobile ? '0.7rem' : '0.8rem', 
-                                                color: '#64748b',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
+                                                fontSize: '0.85rem', 
+                                                color: '#6b7280',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem'
                                             }}>
-                                                {r.empleados?.cargo}
+                                                <span>{r.empleados?.cargo}</span>
+                                                <span style={{
+                                                    background: r.hora_salida ? '#fee2e2' : '#d1fae5',
+                                                    color: r.hora_salida ? '#991b1b' : '#065f46',
+                                                    padding: '0.15rem 0.5rem',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.7rem',
+                                                    fontWeight: '600',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    {r.hora_salida ? 'Salió' : 'Presente'}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                     <div style={{ 
-                                        textAlign: 'right', 
-                                        fontSize: isMobile ? '0.8rem' : '0.9rem',
+                                        textAlign: 'right',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: '0.15rem',
-                                        minWidth: isMobile ? 'auto' : '120px'
+                                        gap: '0.25rem'
                                     }}>
                                         <div style={{ 
                                             color: '#059669', 
                                             fontFamily: 'monospace',
-                                            fontWeight: '600',
-                                            fontSize: isMobile ? '0.75rem' : '0.85rem'
+                                            fontWeight: '700',
+                                            fontSize: '0.95rem'
                                         }}>
-                                            <span style={{ color: '#9ca3af', fontSize: isMobile ? '0.65rem' : '0.7rem' }}>ENT:</span> {r.hora_entrada}
+                                            <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>ENT </span>
+                                            {r.hora_entrada}
                                         </div>
                                         {r.hora_salida && (
                                             <div style={{ 
                                                 color: '#dc2626', 
                                                 fontFamily: 'monospace',
-                                                fontWeight: '600',
-                                                fontSize: isMobile ? '0.75rem' : '0.85rem'
+                                                fontWeight: '700',
+                                                fontSize: '0.95rem'
                                             }}>
-                                                <span style={{ color: '#9ca3af', fontSize: isMobile ? '0.65rem' : '0.7rem' }}>SAL:</span> {r.hora_salida}
+                                                <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>SAL </span>
+                                                {r.hora_salida}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             ))}
+                            
+                            {registrosHoy.length > 10 && (
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    padding: '1rem',
+                                    color: '#6b7280',
+                                    fontSize: '0.9rem'
+                                }}>
+                                    Mostrando 10 de {registrosHoy.length} registros. 
+                                    <Link href="/reportes" style={{ color: '#3b82f6', marginLeft: '0.5rem', fontWeight: '600' }}>
+                                        Ver todos →
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
-
             </div>
         </div>
     );
