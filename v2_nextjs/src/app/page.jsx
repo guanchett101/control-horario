@@ -46,17 +46,26 @@ export default function Dashboard() {
         setIsReady(true);
 
         const interval = setInterval(() => setHoraActual(new Date()), 1000);
-        cargarDatos();
+        
+        // Cargar datos solo después de que user esté disponible
+        if (user.rol) {
+            cargarDatos();
+        }
 
         return () => clearInterval(interval);
     }, [user]);
 
     const cargarDatos = async () => {
+        if (!user || !user.rol) {
+            console.log('Usuario no disponible aún');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             let url = `${API_URL}/registros?action=hoy`;
 
-            if (user?.rol !== 'admin') {
+            if (user.rol !== 'admin') {
                 url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
             }
 
@@ -67,19 +76,25 @@ export default function Dashboard() {
             const registros = Array.isArray(response.data) ? response.data : [];
             setRegistrosHoy(registros);
 
-            if (user?.rol === 'admin') {
+            // Solo calcular stats si es admin
+            if (user.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
                 
-                const empResponse = await axios.get(`${API_URL}/empleados`);
-                const totalEmpleados = empResponse.data.length;
-                
-                setStats({
-                    totalEmpleados,
-                    presentes,
-                    ausentes: totalEmpleados - presentes - salieron,
-                    salieron
-                });
+                try {
+                    const empResponse = await axios.get(`${API_URL}/empleados`);
+                    const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
+                    
+                    setStats({
+                        totalEmpleados,
+                        presentes,
+                        ausentes: totalEmpleados - presentes - salieron,
+                        salieron
+                    });
+                } catch (empError) {
+                    console.error('Error al cargar empleados:', empError);
+                    // Mantener stats con valores por defecto
+                }
             }
 
             setError(null);
