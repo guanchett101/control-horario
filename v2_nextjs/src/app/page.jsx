@@ -67,12 +67,10 @@ export default function Dashboard() {
             const registros = Array.isArray(response.data) ? response.data : [];
             setRegistrosHoy(registros);
 
-            // Calcular estadísticas
             if (user?.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
                 
-                // Obtener total de empleados
                 const empResponse = await axios.get(`${API_URL}/empleados`);
                 const totalEmpleados = empResponse.data.length;
                 
@@ -140,7 +138,6 @@ export default function Dashboard() {
                     margin: '0 auto',
                     padding: isMobile ? '0.75rem' : '1.5rem'
                 }}>
-                    {/* Header con reloj */}
                     <div style={{
                         background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
                         borderRadius: '8px',
@@ -173,8 +170,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Botón Fichar Grande */}
-                    <Link href="/registro" style={{
+                    <Link href="/registro" className="hover-lift" style={{
                         textDecoration: 'none',
                         display: 'block',
                         background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
@@ -185,14 +181,12 @@ export default function Dashboard() {
                         fontWeight: '700',
                         fontSize: isMobile ? '1.5rem' : '2rem',
                         boxShadow: '0 8px 16px rgba(251, 191, 36, 0.3)',
-                        marginBottom: '1.5rem',
-                        transition: 'transform 0.2s'
+                        marginBottom: '1.5rem'
                     }}>
                         <div style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: '0.5rem' }}>⏱️</div>
                         REGISTRAR HORARIO
                     </Link>
 
-                    {/* Registros del día */}
                     <div className="card" style={{ padding: isMobile ? '1.5rem' : '2rem' }}>
                         <h3 style={{ margin: '0 0 1.5rem 0', fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '700', color: '#111827' }}>
                             📋 Tus Registros de Hoy
@@ -314,22 +308,12 @@ export default function Dashboard() {
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}>
-                    {/* Card Total Empleados */}
-                    <div style={{
+                    <div className="stat-card" style={{
                         background: 'white',
                         borderRadius: '12px',
                         padding: '1.5rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb',
-                        transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                             <div style={{
@@ -353,22 +337,12 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Card Presentes */}
-                    <div style={{
+                    <div className="stat-card" style={{
                         background: 'white',
                         borderRadius: '12px',
                         padding: '1.5rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb',
-                        transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                             <div style={{
@@ -392,22 +366,12 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Card Ausentes */}
-                    <div style={{
+                    <div className="stat-card" style={{
                         background: 'white',
                         borderRadius: '12px',
                         padding: '1.5rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb',
-                        transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                             <div style={{
@@ -431,22 +395,12 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Card Salieron */}
-                    <div style={{
+                    <div className="stat-card" style={{
                         background: 'white',
                         borderRadius: '12px',
                         padding: '1.5rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid #e5e7eb',
-                        transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                             <div style={{
@@ -471,7 +425,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Acciones Rápidas - Grid Profesional */}
+                {/* Acciones Rápidas */}
                 <div style={{
                     background: 'white',
                     borderRadius: '12px',
@@ -497,8 +451,7 @@ export default function Dashboard() {
                         gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
                         gap: '1.5rem'
                     }}>
-                        {/* Gestionar Empleados */}
-                        <Link href="/empleados" style={{
+                        <Link href="/empleados" className="action-card" style={{
                             textDecoration: 'none',
                             background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                             color: 'white',
@@ -511,16 +464,7 @@ export default function Dashboard() {
                             gap: '1rem',
                             fontWeight: '600',
                             boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
                             fontSize: '1.1rem'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
                         }}>
                             <div style={{ fontSize: '3rem' }}>👥</div>
                             <div style={{ textAlign: 'center' }}>
@@ -531,8 +475,7 @@ export default function Dashboard() {
                             </div>
                         </Link>
 
-                        {/* Ver Reportes */}
-                        <Link href="/reportes" style={{
+                        <Link href="/reportes" className="action-card" style={{
                             textDecoration: 'none',
                             background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                             color: 'white',
@@ -545,16 +488,7 @@ export default function Dashboard() {
                             gap: '1rem',
                             fontWeight: '600',
                             boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
                             fontSize: '1.1rem'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
                         }}>
                             <div style={{ fontSize: '3rem' }}>📊</div>
                             <div style={{ textAlign: 'center' }}>
@@ -565,8 +499,7 @@ export default function Dashboard() {
                             </div>
                         </Link>
 
-                        {/* Perfiles de Turno */}
-                        <Link href="/perfiles-turno" style={{
+                        <Link href="/perfiles-turno" className="action-card" style={{
                             textDecoration: 'none',
                             background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
                             color: 'white',
@@ -579,16 +512,7 @@ export default function Dashboard() {
                             gap: '1rem',
                             fontWeight: '600',
                             boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
                             fontSize: '1.1rem'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(139, 92, 246, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
                         }}>
                             <div style={{ fontSize: '3rem' }}>⏰</div>
                             <div style={{ textAlign: 'center' }}>
@@ -600,15 +524,13 @@ export default function Dashboard() {
                         </Link>
                     </div>
 
-                    {/* Fila adicional de acciones */}
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
                         gap: '1.5rem',
                         marginTop: '1.5rem'
                     }}>
-                        {/* Registro Manual */}
-                        <Link href="/registro" style={{
+                        <Link href="/registro" className="action-card-small" style={{
                             textDecoration: 'none',
                             background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                             color: 'white',
@@ -618,16 +540,7 @@ export default function Dashboard() {
                             alignItems: 'center',
                             gap: '1rem',
                             fontWeight: '600',
-                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
                         }}>
                             <div style={{ fontSize: '2.5rem' }}>⏱️</div>
                             <div>
@@ -638,8 +551,7 @@ export default function Dashboard() {
                             </div>
                         </Link>
 
-                        {/* Personalización */}
-                        <Link href="/visual" style={{
+                        <Link href="/visual" className="action-card-small" style={{
                             textDecoration: 'none',
                             background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
                             color: 'white',
@@ -649,16 +561,7 @@ export default function Dashboard() {
                             alignItems: 'center',
                             gap: '1rem',
                             fontWeight: '600',
-                            boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(236, 72, 153, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.3)';
+                            boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)'
                         }}>
                             <div style={{ fontSize: '2.5rem' }}>🎨</div>
                             <div>
@@ -698,17 +601,15 @@ export default function Dashboard() {
                         </h3>
                         <button 
                             onClick={() => { setLoading(true); cargarDatos(); }} 
+                            className="refresh-btn"
                             style={{ 
                                 background: '#f3f4f6', 
                                 border: 'none', 
                                 cursor: 'pointer', 
                                 fontSize: '1.2rem',
                                 padding: '0.5rem 0.75rem',
-                                borderRadius: '8px',
-                                transition: 'background 0.2s'
+                                borderRadius: '8px'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = '#f3f4f6'}
                         >
                             🔄
                         </button>
@@ -740,23 +641,14 @@ export default function Dashboard() {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             {registrosHoy.slice(0, 10).map(r => (
-                                <div key={r.id} style={{ 
+                                <div key={r.id} className="activity-item" style={{ 
                                     display: 'flex', 
                                     justifyContent: 'space-between', 
                                     alignItems: 'center',
                                     padding: '1.25rem', 
                                     background: '#f8fafc', 
                                     borderRadius: '10px',
-                                    border: '1px solid #e5e7eb',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = '#f1f5f9';
-                                    e.currentTarget.style.borderColor = '#cbd5e1';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = '#f8fafc';
-                                    e.currentTarget.style.borderColor = '#e5e7eb';
+                                    border: '1px solid #e5e7eb'
                                 }}>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
                                         <div style={{ 
@@ -793,7 +685,8 @@ export default function Dashboard() {
                                                 color: '#6b7280',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '0.5rem'
+                                                gap: '0.5rem',
+                                                flexWrap: 'wrap'
                                             }}>
                                                 <span>{r.empleados?.cargo}</span>
                                                 <span style={{
