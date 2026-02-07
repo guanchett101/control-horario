@@ -1,4 +1,7 @@
+import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export async function GET(request) {
     try {
