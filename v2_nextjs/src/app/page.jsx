@@ -88,8 +88,8 @@ export default function Dashboard() {
                 const registros = Array.isArray(response.data) ? response.data : [];
                 setRegistrosHoy(registros);
 
-                // PASO 2: Solo si es admin Y NO es móvil, cargar empleados (DESPUÉS de registros)
-                if (user.rol === 'admin' && !isMobile) {
+                // PASO 2: Solo si es admin, cargar empleados (DESPUÉS de registros)
+                if (user.rol === 'admin') {
                     const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                     const salieron = registros.filter(r => r.hora_salida).length;
 
@@ -176,8 +176,8 @@ export default function Dashboard() {
             const registros = Array.isArray(response.data) ? response.data : [];
             setRegistrosHoy(registros);
 
-            // PASO 2: Solo si es admin Y NO es móvil, cargar empleados (DESPUÉS de registros)
-            if (user.rol === 'admin' && !isMobile) {
+            // PASO 2: Solo si es admin, cargar empleados (DESPUÉS de registros)
+            if (user.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
 
@@ -436,12 +436,11 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Estadísticas en Cards - Solo escritorio */}
-                {!isMobile && (
+                {/* Estadísticas en Cards */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '1.5rem',
+                    gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+                    gap: isMobile ? '1rem' : '1.5rem',
                     marginBottom: '2rem'
                 }}>
                     <div className="stat-card" style={{
@@ -560,7 +559,6 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-                )}
 
                 {/* Acciones Rápidas */}
                 <div style={{
