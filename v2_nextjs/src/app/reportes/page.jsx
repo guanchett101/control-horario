@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const API_URL = '/api';
 
@@ -13,6 +15,7 @@ export default function ReportesPage() {
     const [empleadoId, setEmpleadoId] = useState('');
     const [fechaInicio, setFechaInicio] = useState('');
     const [fechaFin, setFechaFin] = useState('');
+    const [filtroRapido, setFiltroRapido] = useState('mes'); // 'hoy', 'semana', 'mes', 'personalizado'
     const [registros, setRegistros] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingEmpleados, setLoadingEmpleados] = useState(true);
@@ -94,6 +97,34 @@ export default function ReportesPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Filtros rápidos
+    const aplicarFiltroRapido = (filtro) => {
+        setFiltroRapido(filtro);
+        const hoy = new Date();
+        let inicio, fin;
+
+        switch (filtro) {
+            case 'hoy':
+                inicio = fin = hoy.toISOString().split('T')[0];
+                break;
+            case 'semana':
+                // Lunes de esta semana
+                const primerDia = hoy.getDate() - hoy.getDay() + 1;
+                inicio = new Date(hoy.setDate(primerDia)).toISOString().split('T')[0];
+                fin = new Date().toISOString().split('T')[0];
+                break;
+            case 'mes':
+                inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+                fin = new Date().toISOString().split('T')[0];
+                break;
+            default:
+                return;
+        }
+
+        setFechaInicio(inicio);
+        setFechaFin(fin);
     };
 
     const calcularHoras = (entrada, salida) => {
@@ -279,6 +310,74 @@ export default function ReportesPage() {
         document.body.removeChild(link);
     };
 
+    const exportarPDF = () => {
+        if (registros.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+
+        const empleado = empleados.find(e => e.id === parseInt(empleadoId));
+        const nombreEmpleado = empleado ? `${empleado.nombre} ${empleado.apellido}` : 'Empleado';
+        
+        const doc = new jsPDF();
+        
+        // Título
+        doc.setFontSize(18);
+        doc.setTextColor(30, 60, 114);
+        doc.text('Reporte de Horarios', 14, 20);
+        
+        // Información del empleado
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Empleado: ${nombreEmpleado}`, 14, 30);
+        doc.text(`Período: ${new Date(fechaInicio).toLocaleDateString('es-ES')} - ${new Date(fechaFin).toLocaleDateString('es-ES')}`, 14, 36);
+        
+        // Tabla de registros
+        const tableData = registros.map(reg => [
+            new Date(reg.fecha).toLocaleDateString('es-ES'),
+            `${reg.empleados?.nombre} ${reg.empleados?.apellido}`,
+            reg.empleados?.cargo || '-',
+            reg.hora_entrada || '-',
+            reg.hora_salida || '-',
+            calcularHoras(reg.hora_entrada, reg.hora_salida).texto
+        ]);
+        
+        doc.autoTable({
+            startY: 42,
+            head: [['Fecha', 'Empleado', 'Cargo', 'Entrada', 'Salida', 'Horas']],
+            body: tableData,
+            theme: 'striped',
+            headStyles: { fillColor: [30, 60, 114], textColor: 255 },
+            styles: { fontSize: 9, cellPadding: 3 },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 30 },
+                3: { cellWidth: 25 },
+                4: { cellWidth: 25 },
+                5: { cellWidth: 25 }
+            }
+        });
+        
+        // Resumen
+        const totales = calcularTotales();
+        const finalY = doc.lastAutoTable.finalY + 10;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumen:', 14, finalY);
+        
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Días trabajados: ${totales.diasTrabajados}`, 14, finalY + 7);
+        doc.text(`Días incompletos: ${totales.diasIncompletos}`, 14, finalY + 14);
+        doc.text(`Total horas: ${totales.totalHoras}`, 14, finalY + 21);
+        doc.text(`Promedio diario: ${totales.promedioHoras}`, 14, finalY + 28);
+        
+        // Guardar
+        doc.save(`reporte_${empleado?.nombre}_${empleado?.apellido}_${fechaInicio}_${fechaFin}.pdf`);
+    };
+
     if (!user) return null;
 
     const totales = registros.length > 0 ? calcularTotales() : null;
@@ -302,6 +401,67 @@ export default function ReportesPage() {
                     <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', fontWeight: '600', color: '#4b5563' }}>
                         ⚙️ Filtros de Búsqueda
                     </h3>
+
+                    {/* Filtros Rápidos */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ fontWeight: '500', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>
+                            Filtros Rápidos:
+                        </label>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                onClick={() => aplicarFiltroRapido('hoy')}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '4px',
+                                    border: filtroRapido === 'hoy' ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                                    background: filtroRapido === 'hoy' ? '#eff6ff' : 'white',
+                                    color: filtroRapido === 'hoy' ? '#3b82f6' : '#6b7280',
+                                    fontWeight: filtroRapido === 'hoy' ? '600' : '500',
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                📅 Hoy
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => aplicarFiltroRapido('semana')}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '4px',
+                                    border: filtroRapido === 'semana' ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                                    background: filtroRapido === 'semana' ? '#eff6ff' : 'white',
+                                    color: filtroRapido === 'semana' ? '#3b82f6' : '#6b7280',
+                                    fontWeight: filtroRapido === 'semana' ? '600' : '500',
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                📆 Esta Semana
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => aplicarFiltroRapido('mes')}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '4px',
+                                    border: filtroRapido === 'mes' ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                                    background: filtroRapido === 'mes' ? '#eff6ff' : 'white',
+                                    color: filtroRapido === 'mes' ? '#3b82f6' : '#6b7280',
+                                    fontWeight: filtroRapido === 'mes' ? '600' : '500',
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                📊 Este Mes
+                            </button>
+                        </div>
+                    </div>
+
                     <form onSubmit={buscarRegistros}>
                         <div className="form-group">
                             <label style={{ fontWeight: '500' }}>Empleado</label>
@@ -330,7 +490,10 @@ export default function ReportesPage() {
                                 <input
                                     type="date"
                                     value={fechaInicio}
-                                    onChange={(e) => setFechaInicio(e.target.value)}
+                                    onChange={(e) => {
+                                        setFechaInicio(e.target.value);
+                                        setFiltroRapido('personalizado');
+                                    }}
                                     required
                                     style={{ padding: '0.6rem', background: '#f9fafb' }}
                                 />
@@ -341,7 +504,10 @@ export default function ReportesPage() {
                                 <input
                                     type="date"
                                     value={fechaFin}
-                                    onChange={(e) => setFechaFin(e.target.value)}
+                                    onChange={(e) => {
+                                        setFechaFin(e.target.value);
+                                        setFiltroRapido('personalizado');
+                                    }}
                                     required
                                     style={{ padding: '0.6rem', background: '#f9fafb' }}
                                 />
@@ -377,6 +543,7 @@ export default function ReportesPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                            <button onClick={exportarPDF} className="btn btn-danger" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', flex: isMobile ? '1' : 'initial', background: '#dc2626', border: 'none' }}>📄 Descargar PDF</button>
                             <button onClick={exportarExcel} className="btn btn-success" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', flex: isMobile ? '1' : 'initial' }}>📊 Descargar Excel</button>
                             <button onClick={exportarCSV} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', flex: isMobile ? '1' : 'initial' }}>📄 Descargar CSV</button>
                         </div>
