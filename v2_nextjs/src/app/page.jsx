@@ -770,8 +770,8 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {registrosHoy.slice(0, 10).map(r => (
-                                <div key={r.id} className="activity-item" style={{
+                            {registrosHoy.filter(r => r && typeof r === 'object').slice(0, 10).map((r, index) => (
+                                <div key={r.id || index} className="activity-item" style={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
