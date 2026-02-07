@@ -1,155 +1,221 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { enviarAviso } from '@/lib/email';
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
 
-export async function GET() {
-    try {
-        const now = new Date();
-        const fechaHoy = now.toISOString().split('T')[0];
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-        // Ajuste básico de hora local (suponiendo servidor UTC y usuario en GMT+1/+2)
-        // Para producción real, lo ideal es usar librerías como 'date-fns-tz' o configurar la zona horaria del servidor.
-        // Aquí comparamos usando la hora del servidor actual.
-        const minutosActuales = now.getHours() * 60 + now.getMinutes();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-        // 1. Obtener todos los empleados activos
-        const { data: empleados, error: errorEmp } = await supabase
-            .from('empleados')
-            .select('*')
-            .eq('activo', true);
+export async function GET(request) {
+  try {
+    // 1. Verificar autenticación (token secreto)
+    const authHeader = request.headers.get('authorization');
+    const expectedToken = process.env.CRON_SECRET || 'cambiar_este_token_secreto';
+    
+    if (authHeader !== `Bearer ${expectedToken}`) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-        if (errorEmp) throw errorEmp;
+    // 2. Verificar que no sea fin de semana
+    const ahora = new Date();
+    const diaSemana = ahora.getDay(); // 0=Domingo, 6=Sábado
+    
+    if (diaSemana === 0 || diaSemana === 6) {
+      return Response.json({ 
+        success: true,
+        mensaje: 'Fin de semana - No se envían notificaciones',
+        dia: diaSemana === 0 ? 'Domingo' : 'Sábado'
+      });
+    }
 
-        // 2. Obtener registros de HOY
-        const { data: registros, error: errorReg } = await supabase
-            .from('registros')
-            .select('*')
-            .eq('fecha', fechaHoy);
+    // 3. Obtener fecha y hora actual
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaActual = ahora.getHours();
+    const minutosActuales = ahora.getMinutes();
+    const minutosDesdeMedianoche = horaActual * 60 + minutosActuales;
 
-        if (errorReg) throw errorReg;
+    console.log(`[CRON] Verificando fichajes para: ${hoy} a las ${horaActual}:${minutosActuales}`);
 
-        // 3. Analizar discrepancias
-        const reporte = {
-            timestamp: now.toISOString(),
-            total_empleados: empleados.length,
-            incidentes: []
-        };
+    // 4. Obtener todos los empleados activos
+    const { data: empleados, error: errorEmpleados } = await supabase
+      .from('empleados')
+      .select('id, nombre, apellido, email, cargo, horario_entrada, horario_salida, horario_entrada_tarde, horario_salida_tarde')
+      .eq('activo', true);
 
-        for (const emp of empleados) {
-            // --- TURNO MAÑANA / CONTINUO ---
-            const entradaMañana = emp.horario_entrada || '09:00';
-            const salidaMañana = emp.horario_salida || '18:00';
+    if (errorEmpleados) {
+      console.error('[ERROR] Al obtener empleados:', errorEmpleados);
+      return Response.json({ error: errorEmpleados.message }, { status: 500 });
+    }
 
-            const [hE1, mE1] = entradaMañana.split(':').map(Number);
-            const [hS1, mS1] = salidaMañana.split(':').map(Number);
+    console.log(`[INFO] Empleados activos: ${empleados.length}`);
 
-            const minutosEntrada1 = hE1 * 60 + mE1;
-            const minutosSalida1 = hS1 * 60 + mS1;
+    // 5. Obtener registros de hoy
+    const { data: registrosHoy, error: errorRegistros } = await supabase
+      .from('registros')
+      .select('empleado_id, hora_entrada, hora_salida')
+      .eq('fecha', hoy);
 
-            // Buscar registros del empleado para hoy
-            const registrosEmp = registros.filter(r => r.empleado_id === emp.id);
-            // Ordenar por hora (aunque suelen venir ordenados)
-            registrosEmp.sort((a, b) => a.hora_entrada.localeCompare(b.hora_entrada));
+    if (errorRegistros) {
+      console.error('[ERROR] Al obtener registros:', errorRegistros);
+      return Response.json({ error: errorRegistros.message }, { status: 500 });
+    }
 
-            const primerFichaje = registrosEmp[0];
-            const ultimoFichaje = registrosEmp[registrosEmp.length - 1];
+    console.log(`[INFO] Registros de hoy: ${registrosHoy.length}`);
 
-            // 1. CHEQUEO MAÑANA: Ausencia
-            if (minutosActuales > (minutosEntrada1 + 30) && !primerFichaje) {
-                const mensaje = `Hola ${emp.nombre}, son las ${now.toLocaleTimeString()} y no hemos registrado tu entrada de las ${entradaMañana}. Por favor, contacta con administración si es un error.`;
-                reporte.incidentes.push({
-                    empleado: `${emp.nombre} ${emp.apellido}`,
-                    tipo: 'AUSENCIA_MAÑANA',
-                    mensaje: mensaje,
-                    accion_recomendada: 'Correo enviado.'
-                });
+    // 6. Procesar cada empleado
+    const resultados = {
+      fecha: hoy,
+      hora: `${horaActual}:${minutosActuales}`,
+      empleadosActivos: empleados.length,
+      empleadosConFichaje: 0,
+      notificacionesEnviadas: 0,
+      notificacionesFallidas: 0,
+      detalles: []
+    };
 
-                if (emp.email) {
-                    await enviarAviso(emp.email, '⚠️ Alerta de Asistencia: Entrada Pendiente', mensaje);
-                }
-            }
+    for (const emp of empleados) {
+      // Verificar si tiene email
+      if (!emp.email) {
+        console.log(`[SKIP] ${emp.nombre} ${emp.apellido} - Sin email`);
+        continue;
+      }
 
-            // 2. CHEQUEO MAÑANA: Olvido Salida (si no tiene turno de tarde o si estamos en el hueco del mediodía)
-            // Si tiene turno de tarde, definimos el hueco. Si no, fin del día.
-            const tieneTarde = !!emp.horario_entrada_tarde;
+      // Obtener horario de entrada (por defecto 09:00)
+      const horarioEntrada = emp.horario_entrada || '09:00';
+      const [horaEntrada, minutosEntrada] = horarioEntrada.split(':').map(Number);
+      const minutosEntradaEmpleado = horaEntrada * 60 + minutosEntrada;
 
-            if (primerFichaje && !primerFichaje.hora_salida) {
-                // Si ya pasó mucho tiempo de su hora de salida teórica
-                if (minutosActuales > (minutosSalida1 + 60)) {
-                    const mensaje = `Hola ${emp.nombre}, parece que olvidaste fichar tu salida de las ${salidaMañana}.`;
-                    reporte.incidentes.push({
-                        empleado: `${emp.nombre} ${emp.apellido}`,
-                        tipo: 'OLVIDO_SALIDA_MAÑANA',
-                        mensaje: mensaje,
-                        accion_recomendada: 'Correo enviado.'
-                    });
+      // Margen de tolerancia: 15 minutos
+      const margenMinutos = 15;
+      const minutosLimite = minutosEntradaEmpleado + margenMinutos;
 
-                    if (emp.email) {
-                        await enviarAviso(emp.email, '⚠️ Recordatorio: Fichar Salida', mensaje);
-                    }
-                }
-            }
+      // Verificar si ya pasó su hora de entrada + margen
+      if (minutosDesdeMedianoche < minutosLimite) {
+        console.log(`[SKIP] ${emp.nombre} - Aún no es su hora (${horarioEntrada} + ${margenMinutos}min)`);
+        continue;
+      }
 
-            // --- TURNO TARDE (Opcional) ---
-            if (tieneTarde) {
-                const entradaTarde = emp.horario_entrada_tarde;
-                const salidaTarde = emp.horario_salida_tarde;
+      // Verificar si ya fichó
+      const yaFicho = registrosHoy.some(r => r.empleado_id === emp.id && r.hora_entrada);
 
-                const [hE2, mE2] = entradaTarde.split(':').map(Number);
-                const [hS2, mS2] = salidaTarde.split(':').map(Number);
+      if (yaFicho) {
+        resultados.empleadosConFichaje++;
+        console.log(`[OK] ${emp.nombre} ${emp.apellido} - Ya fichó`);
+        continue;
+      }
 
-                const minutosEntrada2 = hE2 * 60 + mE2;
-                const minutosSalida2 = hS2 * 60 + mS2;
+      // El empleado NO ha fichado y ya pasó su hora
+      console.log(`[AVISO] ${emp.nombre} ${emp.apellido} - No ha fichado (horario: ${horarioEntrada})`);
 
-                // 3. CHEQUEO TARDE: Ausencia (Ya pasó hora entrada tarde y no hay segundo fichaje)
-                // Buscamos si hay algún fichaje que haya empezado CERCA de la hora de la tarde (ej. +/- 1 hora)
-                // O simplemente si hay más de 1 fichaje.
-                const fichajeTarde = registrosEmp.find(r => {
-                    const [hR, mR] = r.hora_entrada.split(':').map(Number);
-                    const minsR = hR * 60 + mR;
-                    // Consideramos fichaje de tarde si es después de la salida teórica de la mañana
-                    return minsR > (minutosSalida1 - 30);
-                });
+      try {
+        // Enviar email
+        const { data, error } = await resend.emails.send({
+          from: 'Control Horario <onboarding@resend.dev>',
+          to: emp.email,
+          subject: '⚠️ Recordatorio: No has fichado hoy',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #6b7280; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1 style="margin: 0;">⏰ Control de Horarios</h1>
+                </div>
+                <div class="content">
+                  <h2>Hola ${emp.nombre},</h2>
+                  <p>Notamos que <strong>aún no has registrado tu entrada</strong> el día de hoy.</p>
+                  <p>Tu horario de entrada es: <strong>${horarioEntrada}</strong></p>
+                  <p>Por favor, ficha lo antes posible haciendo clic en el siguiente botón:</p>
+                  <div style="text-align: center;">
+                    <a href="https://control-horario100.vercel.app/registro" class="button">
+                      📝 Fichar Ahora
+                    </a>
+                  </div>
+                  <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
+                    <strong>Nota:</strong> Si ya fichaste y recibes este mensaje, por favor contacta con administración.
+                  </p>
+                </div>
+                <div class="footer">
+                  <p>Este es un mensaje automático del Sistema de Control de Horarios</p>
+                  <p>No respondas a este email</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `
+        });
 
-                if (minutosActuales > (minutosEntrada2 + 30) && !fichajeTarde) {
-                    // Solo reportar si ya fichó por la mañana (si no fichó mañana, ya saltó la alarma de ausencia total)
-                    if (primerFichaje) {
-                        const mensaje = `Hola ${emp.nombre}, es tu turno de tarde (${entradaTarde}) y no vemos tu fichaje de entrada.`;
-                        reporte.incidentes.push({
-                            empleado: `${emp.nombre} ${emp.apellido}`,
-                            tipo: 'AUSENCIA_TARDE',
-                            mensaje: mensaje,
-                            accion_recomendada: 'Correo enviado.'
-                        });
-
-                        if (emp.email) {
-                            await enviarAviso(emp.email, '⚠️ Alerta Tarde: Entrada Pendiente', mensaje);
-                        }
-                    }
-                }
-
-                // 4. CHEQUEO TARDE: Olvido Salida
-                if (fichajeTarde && !fichajeTarde.hora_salida) {
-                    if (minutosActuales > (minutosSalida2 + 60)) {
-                        const mensaje = `Hola ${emp.nombre}, tu turno de tarde acababa a las ${salidaTarde} y sigues fichado.`;
-                        reporte.incidentes.push({
-                            empleado: `${emp.nombre} ${emp.apellido}`,
-                            tipo: 'OLVIDO_SALIDA_TARDE',
-                            mensaje: mensaje,
-                            accion_recomendada: 'Correo enviado.'
-                        });
-
-                        if (emp.email) {
-                            await enviarAviso(emp.email, '⚠️ Recordatorio: Cerrar Turno Tarde', mensaje);
-                        }
-                    }
-                }
-            }
+        if (error) {
+          throw error;
         }
 
-        return NextResponse.json(reporte);
+        // Guardar log exitoso
+        await supabase.from('email_logs').insert({
+          empleado_id: emp.id,
+          tipo: 'aviso_fichaje',
+          destinatario: emp.email,
+          asunto: '⚠️ Recordatorio: No has fichado hoy',
+          estado: 'enviado'
+        });
 
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        resultados.notificacionesEnviadas++;
+        resultados.detalles.push({
+          empleado: `${emp.nombre} ${emp.apellido}`,
+          email: emp.email,
+          horario: horarioEntrada,
+          estado: 'enviado'
+        });
+
+        console.log(`[✓] Email enviado a: ${emp.nombre} ${emp.apellido} (${emp.email})`);
+
+      } catch (error) {
+        // Guardar log de error
+        await supabase.from('email_logs').insert({
+          empleado_id: emp.id,
+          tipo: 'aviso_fichaje',
+          destinatario: emp.email,
+          asunto: '⚠️ Recordatorio: No has fichado hoy',
+          estado: 'fallido',
+          mensaje_error: error.message
+        });
+
+        resultados.notificacionesFallidas++;
+        resultados.detalles.push({
+          empleado: `${emp.nombre} ${emp.apellido}`,
+          email: emp.email,
+          horario: horarioEntrada,
+          estado: 'fallido',
+          error: error.message
+        });
+
+        console.error(`[✗] Error al enviar email a: ${emp.nombre} ${emp.apellido}`, error);
+      }
     }
+
+    // 7. Retornar resumen
+    return Response.json({
+      success: true,
+      ...resultados
+    });
+
+  } catch (error) {
+    console.error('[ERROR FATAL]', error);
+    return Response.json({ 
+      error: 'Error interno del servidor',
+      details: error.message 
+    }, { status: 500 });
+  }
 }
