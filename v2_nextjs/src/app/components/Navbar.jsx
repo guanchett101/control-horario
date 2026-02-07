@@ -7,13 +7,14 @@ function Navbar({ user, onLogout }) {
     const [isMobile, setIsMobile] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [mounted, setMounted] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
     // Sincronizar usuario desde localStorage y props
     useEffect(() => {
         setMounted(true);
-        
+
         // Priorizar prop user, pero verificar localStorage como backup
         if (user) {
             setCurrentUser(user);
@@ -45,9 +46,6 @@ function Navbar({ user, onLogout }) {
 
     const isActive = (path) => pathname === path;
 
-    // Handle logout internally if no prop provided, but usually parent handles it.
-    // We keep onLogout prop for compatibility if parent manages state.
-    // If we wanted to make Navbar self-sufficient:
     const handleLogout = () => {
         if (onLogout) {
             onLogout();
@@ -58,15 +56,266 @@ function Navbar({ user, onLogout }) {
         }
     };
 
+    const toggleMenu = () => {
+        setMenuOpen(!menuOpen);
+    };
+
+    const closeMenu = () => {
+        setMenuOpen(false);
+    };
+
+    // VISTA MÓVIL CON MENÚ HAMBURGUESA
+    if (isMobile) {
+        return (
+            <>
+                <nav className="navbar fade-in" style={{ position: 'relative' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <h1 style={{ margin: 0 }}>⏰ Control</h1>
+                    </div>
+
+                    <button
+                        onClick={toggleMenu}
+                        style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            color: 'white',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '8px',
+                            fontSize: '1.5rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        {menuOpen ? '✕' : '☰'}
+                    </button>
+                </nav>
+
+                {/* Menú desplegable móvil */}
+                {menuOpen && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: '60px',
+                            left: 0,
+                            right: 0,
+                            background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            zIndex: 99,
+                            padding: '1rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            maxHeight: '80vh',
+                            overflowY: 'auto'
+                        }}
+                    >
+                        {currentUser && (
+                            <div style={{
+                                padding: '0.75rem',
+                                background: 'rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                fontWeight: '600',
+                                marginBottom: '0.5rem',
+                                textAlign: 'center'
+                            }}>
+                                👤 {currentUser.nombre}
+                            </div>
+                        )}
+
+                        <Link
+                            href="/"
+                            onClick={closeMenu}
+                            style={{
+                                background: isActive('/') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.5rem' }}>🏠</span> Inicio
+                        </Link>
+
+                        <Link
+                            href="/registro"
+                            onClick={closeMenu}
+                            style={{
+                                background: isActive('/registro') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.5rem' }}>⏱️</span> Fichar
+                        </Link>
+
+                        {currentUser?.rol === 'admin' && (
+                            <>
+                                <Link
+                                    href="/empleados"
+                                    onClick={closeMenu}
+                                    style={{
+                                        background: isActive('/empleados') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        padding: '1rem',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>👥</span> Empleados
+                                </Link>
+
+                                <Link
+                                    href="/reportes"
+                                    onClick={closeMenu}
+                                    style={{
+                                        background: isActive('/reportes') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        padding: '1rem',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>📊</span> Reportes
+                                </Link>
+
+                                <Link
+                                    href="/perfiles-turno"
+                                    onClick={closeMenu}
+                                    style={{
+                                        background: isActive('/perfiles-turno') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        padding: '1rem',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>⏰</span> Turnos
+                                </Link>
+
+                                <Link
+                                    href="/visual"
+                                    onClick={closeMenu}
+                                    style={{
+                                        background: isActive('/visual') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        padding: '1rem',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>🎨</span> Visual
+                                </Link>
+                            </>
+                        )}
+
+                        <Link
+                            href="/cambiar-password"
+                            onClick={closeMenu}
+                            style={{
+                                background: isActive('/cambiar-password') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.5rem' }}>🔐</span> Contraseña
+                        </Link>
+
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', margin: '0.5rem 0' }}></div>
+
+                        <button
+                            onClick={() => {
+                                closeMenu();
+                                handleLogout();
+                            }}
+                            style={{
+                                background: 'rgba(239, 68, 68, 0.2)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '8px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.75rem',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.5rem' }}>🚪</span> Cerrar Sesión
+                        </button>
+                    </div>
+                )}
+
+                {/* Overlay para cerrar menú al tocar fuera */}
+                {menuOpen && (
+                    <div
+                        onClick={closeMenu}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.5)',
+                            zIndex: 98
+                        }}
+                    ></div>
+                )}
+            </>
+        );
+    }
+
+    // VISTA ESCRITORIO (sin cambios)
     return (
         <nav className="navbar fade-in">
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <h1 style={{ margin: 0 }}>
-                    {isMobile ? '⏰ Control' : '⏰ Control de Horarios'}
-                </h1>
+                <h1 style={{ margin: 0 }}>⏰ Control de Horarios</h1>
             </div>
 
-            <div className="navbar-menu" style={{ gap: isMobile ? '0.25rem' : '0.75rem' }}>
+            <div className="navbar-menu" style={{ gap: '0.75rem' }}>
                 <Link
                     href="/"
                     style={{
@@ -74,7 +323,7 @@ function Navbar({ user, onLogout }) {
                     }}
                     title="Inicio"
                 >
-                    {isMobile ? '🏠' : 'Inicio'}
+                    Inicio
                 </Link>
                 <Link
                     href="/registro"
@@ -83,7 +332,7 @@ function Navbar({ user, onLogout }) {
                     }}
                     title="Fichar"
                 >
-                    {isMobile ? '⏱️' : 'Registro'}
+                    Registro
                 </Link>
 
                 {currentUser?.rol === 'admin' && (
@@ -93,28 +342,28 @@ function Navbar({ user, onLogout }) {
                             style={{ background: isActive('/empleados') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                             title="Empleados"
                         >
-                            {isMobile ? '👥' : 'Empleados'}
+                            Empleados
                         </Link>
                         <Link
                             href="/reportes"
                             style={{ background: isActive('/reportes') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                             title="Reportes"
                         >
-                            {isMobile ? '📊' : 'Reportes'}
+                            Reportes
                         </Link>
                         <Link
                             href="/perfiles-turno"
                             style={{ background: isActive('/perfiles-turno') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                             title="Perfiles de Turno"
                         >
-                            {isMobile ? '⏰' : 'Turnos'}
+                            Turnos
                         </Link>
                         <Link
                             href="/visual"
                             style={{ background: isActive('/visual') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                             title="Personalización Visual"
                         >
-                            {isMobile ? '🎨' : 'Visual'}
+                            Visual
                         </Link>
                     </>
                 )}
@@ -124,13 +373,12 @@ function Navbar({ user, onLogout }) {
                     style={{ background: isActive('/cambiar-password') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                     title="Seguridad"
                 >
-                    {isMobile ? '🔐' : 'Contraseña'}
+                    Contraseña
                 </Link>
 
-                {/* Separador visual en desktop */}
-                {!isMobile && <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>}
+                <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>
 
-                {!isMobile && currentUser && (
+                {currentUser && (
                     <span style={{
                         fontSize: '0.85rem',
                         fontWeight: '600',
@@ -146,17 +394,14 @@ function Navbar({ user, onLogout }) {
                     className="btn btn-logout"
                     title="Cerrar Sesión"
                     style={{
-                        minWidth: isMobile ? '40px' : 'auto',
-                        height: isMobile ? '40px' : 'auto',
-                        borderRadius: isMobile ? '50%' : '10px',
-                        padding: isMobile ? '0' : '0.5rem 1rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '10px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        marginLeft: '0.25rem'
+                        justifyContent: 'center'
                     }}
                 >
-                    {isMobile ? '🚪' : 'Salir'}
+                    Salir
                 </button>
             </div>
         </nav>
