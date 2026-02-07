@@ -67,8 +67,8 @@ function Navbar({ user, onLogout }) {
     // VISTA MÓVIL CON MENÚ HAMBURGUESA
     if (isMobile) {
         return (
-            <>
-                <nav className="navbar fade-in" style={{ position: 'relative' }}>
+            <div>
+                <nav className="navbar fade-in" style={{ position: 'relative', zIndex: 100 }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <h1 style={{ margin: 0 }}>⏰ Control</h1>
                     </div>
@@ -91,6 +91,22 @@ function Navbar({ user, onLogout }) {
                         {menuOpen ? '✕' : '☰'}
                     </button>
                 </nav>
+
+                {/* Overlay para cerrar menú al tocar fuera */}
+                {menuOpen && (
+                    <div
+                        onClick={closeMenu}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.5)',
+                            zIndex: 98
+                        }}
+                    />
+                )}
 
                 {/* Menú desplegable móvil */}
                 {menuOpen && (
@@ -288,23 +304,7 @@ function Navbar({ user, onLogout }) {
                         </button>
                     </div>
                 )}
-
-                {/* Overlay para cerrar menú al tocar fuera */}
-                {menuOpen && (
-                    <div
-                        onClick={closeMenu}
-                        style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'rgba(0,0,0,0.5)',
-                            zIndex: 98
-                        }}
-                    ></div>
-                )}
-            </>
+            </div>
         );
     }
 
