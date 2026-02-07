@@ -64,12 +64,15 @@ export default function Dashboard() {
     useEffect(() => {
         if (!user || !user.rol || !isReady) return;
 
+        let isMounted = true; // Prevenir actualizaciones si el componente se desmonta
+
         const cargarDatos = async () => {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('token');
+                
+                // PASO 1: Cargar registros
                 let url = `${API_URL}/registros?action=hoy`;
-
                 if (user.rol !== 'admin') {
                     const fechaHoy = new Date().toISOString().split('T')[0];
                     url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`;
@@ -80,19 +83,29 @@ export default function Dashboard() {
                     timeout: 10000
                 });
 
+                if (!isMounted) return; // Componente desmontado, salir
+
                 const registros = Array.isArray(response.data) ? response.data : [];
                 setRegistrosHoy(registros);
 
-                // Solo calcular stats si es admin
+                // PASO 2: Solo si es admin, cargar empleados (DESPUÉS de registros)
                 if (user.rol === 'admin') {
                     const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                     const salieron = registros.filter(r => r.hora_salida).length;
+                    
+                    // Pequeña pausa para evitar sobrecarga en móvil
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    if (!isMounted) return;
                     
                     try {
                         const empResponse = await axios.get(`${API_URL}/empleados`, {
                             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                             timeout: 10000
                         });
+                        
+                        if (!isMounted) return;
+                        
                         const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
                         
                         setStats({
@@ -103,21 +116,39 @@ export default function Dashboard() {
                         });
                     } catch (empError) {
                         console.error('Error al cargar empleados:', empError);
-                        setStats(prev => ({ ...prev }));
+                        // Establecer stats con datos parciales
+                        if (isMounted) {
+                            setStats({
+                                totalEmpleados: 0,
+                                presentes,
+                                ausentes: 0,
+                                salieron
+                            });
+                        }
                     }
                 }
 
-                setError(null);
+                if (isMounted) {
+                    setError(null);
+                }
             } catch (error) {
                 console.error('Error al cargar datos:', error);
-                setError('Error cargando datos. Por favor, recarga la página.');
-                setRegistrosHoy([]);
+                if (isMounted) {
+                    setError('Error cargando datos. Por favor, recarga la página.');
+                    setRegistrosHoy([]);
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         cargarDatos();
+
+        return () => {
+            isMounted = false; // Cleanup: marcar como desmontado
+        };
     }, [user, isReady]);
 
     const recargarDatos = async () => {
@@ -129,8 +160,9 @@ export default function Dashboard() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
+            
+            // PASO 1: Cargar registros
             let url = `${API_URL}/registros?action=hoy`;
-
             if (user.rol !== 'admin') {
                 const fechaHoy = new Date().toISOString().split('T')[0];
                 url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`;
@@ -144,9 +176,13 @@ export default function Dashboard() {
             const registros = Array.isArray(response.data) ? response.data : [];
             setRegistrosHoy(registros);
 
+            // PASO 2: Solo si es admin, cargar empleados (DESPUÉS de registros)
             if (user.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
+                
+                // Pequeña pausa para evitar sobrecarga
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
                 try {
                     const empResponse = await axios.get(`${API_URL}/empleados`, {
@@ -163,6 +199,13 @@ export default function Dashboard() {
                     });
                 } catch (empError) {
                     console.error('Error al cargar empleados:', empError);
+                    // Establecer stats con datos parciales
+                    setStats({
+                        totalEmpleados: 0,
+                        presentes,
+                        ausentes: 0,
+                        salieron
+                    });
                 }
             }
 
