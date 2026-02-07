@@ -1,11 +1,5 @@
 {
     "framework": "nextjs",
     "buildCommand": "next build",
-    "outputDirectory": ".next",
-    "crons": [
-        {
-            "path": "/api/cron/verificar-fichajes",
-            "schedule": "*/30 7-22 * * *"
-        }
-    ]
+    "outputDirectory": ".next"
 }
