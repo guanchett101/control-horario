@@ -14,7 +14,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [horaActual, setHoraActual] = useState(new Date());
-    const [isMobile, setIsMobile] = useState(null);
+    const [isMobile, setIsMobile] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [stats, setStats] = useState({
         totalEmpleados: 0,
@@ -23,42 +23,61 @@ export default function Dashboard() {
         salieron: 0
     });
 
+    // Primer useEffect: Cargar usuario desde localStorage
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
+        try {
+            const storedUser = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
 
-        if (!storedUser || !token) {
-            router.push('/login');
-        } else {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
+            if (!storedUser || !token) {
                 router.push('/login');
+                return;
             }
+
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+        } catch (e) {
+            console.error('Error al cargar usuario:', e);
+            router.push('/login');
         }
     }, [router]);
 
+    // Segundo useEffect: Detectar móvil y configurar reloj
     useEffect(() => {
-        if (!user || !user.rol) return;
+        try {
+            const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            setIsMobile(checkMobile);
+            setIsReady(true);
 
-        const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        setIsMobile(checkMobile);
-        setIsReady(true);
+            const interval = setInterval(() => {
+                setHoraActual(new Date());
+            }, 1000);
 
-        const interval = setInterval(() => setHoraActual(new Date()), 1000);
-        
-        // Cargar datos
+            return () => clearInterval(interval);
+        } catch (e) {
+            console.error('Error en configuración inicial:', e);
+            setIsReady(true);
+        }
+    }, []);
+
+    // Tercer useEffect: Cargar datos cuando user esté disponible
+    useEffect(() => {
+        if (!user || !user.rol || !isReady) return;
+
         const cargarDatos = async () => {
             try {
+                setLoading(true);
                 const token = localStorage.getItem('token');
                 let url = `${API_URL}/registros?action=hoy`;
 
                 if (user.rol !== 'admin') {
-                    url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
+                    const fechaHoy = new Date().toISOString().split('T')[0];
+                    url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`;
                 }
 
                 const response = await axios.get(url, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    timeout: 10000
                 });
 
                 const registros = Array.isArray(response.data) ? response.data : [];
@@ -70,24 +89,28 @@ export default function Dashboard() {
                     const salieron = registros.filter(r => r.hora_salida).length;
                     
                     try {
-                        const empResponse = await axios.get(`${API_URL}/empleados`);
+                        const empResponse = await axios.get(`${API_URL}/empleados`, {
+                            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                            timeout: 10000
+                        });
                         const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
                         
                         setStats({
                             totalEmpleados,
                             presentes,
-                            ausentes: totalEmpleados - presentes - salieron,
+                            ausentes: Math.max(0, totalEmpleados - presentes - salieron),
                             salieron
                         });
                     } catch (empError) {
                         console.error('Error al cargar empleados:', empError);
+                        setStats(prev => ({ ...prev }));
                     }
                 }
 
                 setError(null);
             } catch (error) {
                 console.error('Error al cargar datos:', error);
-                setError('Error cargando datos');
+                setError('Error cargando datos. Por favor, recarga la página.');
                 setRegistrosHoy([]);
             } finally {
                 setLoading(false);
@@ -95,12 +118,13 @@ export default function Dashboard() {
         };
 
         cargarDatos();
-
-        return () => clearInterval(interval);
-    }, [user]);
+    }, [user, isReady]);
 
     const recargarDatos = async () => {
-        if (!user || !user.rol) return;
+        if (!user || !user.rol) {
+            console.warn('No se puede recargar: usuario no disponible');
+            return;
+        }
         
         setLoading(true);
         try {
@@ -108,11 +132,13 @@ export default function Dashboard() {
             let url = `${API_URL}/registros?action=hoy`;
 
             if (user.rol !== 'admin') {
-                url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
+                const fechaHoy = new Date().toISOString().split('T')[0];
+                url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`;
             }
 
             const response = await axios.get(url, {
-                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                timeout: 10000
             });
 
             const registros = Array.isArray(response.data) ? response.data : [];
@@ -123,13 +149,16 @@ export default function Dashboard() {
                 const salieron = registros.filter(r => r.hora_salida).length;
                 
                 try {
-                    const empResponse = await axios.get(`${API_URL}/empleados`);
+                    const empResponse = await axios.get(`${API_URL}/empleados`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                        timeout: 10000
+                    });
                     const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
                     
                     setStats({
                         totalEmpleados,
                         presentes,
-                        ausentes: totalEmpleados - presentes - salieron,
+                        ausentes: Math.max(0, totalEmpleados - presentes - salieron),
                         salieron
                     });
                 } catch (empError) {
@@ -139,9 +168,8 @@ export default function Dashboard() {
 
             setError(null);
         } catch (error) {
-            console.error('Error al cargar datos:', error);
-            setError('Error cargando datos');
-            setRegistrosHoy([]);
+            console.error('Error al recargar datos:', error);
+            setError('Error al recargar. Intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -158,7 +186,7 @@ export default function Dashboard() {
         return `${dias[fecha.getDay()]}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
     };
 
-    if (!user || !isReady || isMobile === null) {
+    if (!isReady || isMobile === null) {
         return (
             <div style={{ 
                 backgroundColor: '#f8f9fa', 
@@ -181,6 +209,10 @@ export default function Dashboard() {
                 </div>
             </div>
         );
+    }
+
+    if (!user) {
+        return null;
     }
 
     // VISTA PARA EMPLEADOS (NO ADMIN)
