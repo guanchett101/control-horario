@@ -377,8 +377,13 @@ export default function Dashboard() {
     }
 
     // VISTA PARA ADMIN - DASHBOARD PROFESIONAL
+    // FORZAR RENDER CLIENT-ONLY O SUPRIMIR WARNINGS para evitar Hydration Error en móvil
+
+    // Si aún no está listo el cliente, mostramos loader para evitar mismatch
+    if (!isReady) return null;
+
     return (
-        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        <div suppressHydrationWarning={true} style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
             <Navbar user={user} />
 
             <div className="container" style={{
