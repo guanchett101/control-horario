@@ -39,7 +39,7 @@ export default function Dashboard() {
     }, [router]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !user.rol) return;
 
         const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         setIsMobile(checkMobile);
@@ -47,20 +47,62 @@ export default function Dashboard() {
 
         const interval = setInterval(() => setHoraActual(new Date()), 1000);
         
-        // Cargar datos solo después de que user esté disponible
-        if (user.rol) {
-            cargarDatos();
-        }
+        // Cargar datos
+        const cargarDatos = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                let url = `${API_URL}/registros?action=hoy`;
+
+                if (user.rol !== 'admin') {
+                    url = `${API_URL}/registros?action=empleado&id=${user.empleadoId}&fechaInicio=${new Date().toISOString().split('T')[0]}&fechaFin=${new Date().toISOString().split('T')[0]}`;
+                }
+
+                const response = await axios.get(url, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                const registros = Array.isArray(response.data) ? response.data : [];
+                setRegistrosHoy(registros);
+
+                // Solo calcular stats si es admin
+                if (user.rol === 'admin') {
+                    const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
+                    const salieron = registros.filter(r => r.hora_salida).length;
+                    
+                    try {
+                        const empResponse = await axios.get(`${API_URL}/empleados`);
+                        const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
+                        
+                        setStats({
+                            totalEmpleados,
+                            presentes,
+                            ausentes: totalEmpleados - presentes - salieron,
+                            salieron
+                        });
+                    } catch (empError) {
+                        console.error('Error al cargar empleados:', empError);
+                    }
+                }
+
+                setError(null);
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+                setError('Error cargando datos');
+                setRegistrosHoy([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        cargarDatos();
 
         return () => clearInterval(interval);
     }, [user]);
 
-    const cargarDatos = async () => {
-        if (!user || !user.rol) {
-            console.log('Usuario no disponible aún');
-            return;
-        }
-
+    const recargarDatos = async () => {
+        if (!user || !user.rol) return;
+        
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
             let url = `${API_URL}/registros?action=hoy`;
@@ -76,7 +118,6 @@ export default function Dashboard() {
             const registros = Array.isArray(response.data) ? response.data : [];
             setRegistrosHoy(registros);
 
-            // Solo calcular stats si es admin
             if (user.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
@@ -93,7 +134,6 @@ export default function Dashboard() {
                     });
                 } catch (empError) {
                     console.error('Error al cargar empleados:', empError);
-                    // Mantener stats con valores por defecto
                 }
             }
 
@@ -615,7 +655,7 @@ export default function Dashboard() {
                             <span>📋</span> Actividad de Hoy
                         </h3>
                         <button 
-                            onClick={() => { setLoading(true); cargarDatos(); }} 
+                            onClick={recargarDatos} 
                             className="refresh-btn"
                             style={{ 
                                 background: '#f3f4f6', 
