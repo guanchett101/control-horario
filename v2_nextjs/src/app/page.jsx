@@ -70,7 +70,7 @@ export default function Dashboard() {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('token');
-                
+
                 // PASO 1: Cargar registros
                 let url = `${API_URL}/registros?action=hoy`;
                 if (user.rol !== 'admin') {
@@ -92,22 +92,22 @@ export default function Dashboard() {
                 if (user.rol === 'admin') {
                     const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                     const salieron = registros.filter(r => r.hora_salida).length;
-                    
+
                     // Pequeña pausa para evitar sobrecarga en móvil
                     await new Promise(resolve => setTimeout(resolve, 100));
-                    
+
                     if (!isMounted) return;
-                    
+
                     try {
                         const empResponse = await axios.get(`${API_URL}/empleados`, {
                             headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                             timeout: 10000
                         });
-                        
+
                         if (!isMounted) return;
-                        
+
                         const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
-                        
+
                         setStats({
                             totalEmpleados,
                             presentes,
@@ -156,11 +156,11 @@ export default function Dashboard() {
             console.warn('No se puede recargar: usuario no disponible');
             return;
         }
-        
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            
+
             // PASO 1: Cargar registros
             let url = `${API_URL}/registros?action=hoy`;
             if (user.rol !== 'admin') {
@@ -180,17 +180,17 @@ export default function Dashboard() {
             if (user.rol === 'admin') {
                 const presentes = registros.filter(r => r.hora_entrada && !r.hora_salida).length;
                 const salieron = registros.filter(r => r.hora_salida).length;
-                
+
                 // Pequeña pausa para evitar sobrecarga
                 await new Promise(resolve => setTimeout(resolve, 100));
-                
+
                 try {
                     const empResponse = await axios.get(`${API_URL}/empleados`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                         timeout: 10000
                     });
                     const totalEmpleados = Array.isArray(empResponse.data) ? empResponse.data.length : 0;
-                    
+
                     setStats({
                         totalEmpleados,
                         presentes,
@@ -231,18 +231,18 @@ export default function Dashboard() {
 
     if (!isReady || isMobile === null) {
         return (
-            <div style={{ 
-                backgroundColor: '#f8f9fa', 
-                minHeight: '100vh', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
+            <div style={{
+                backgroundColor: '#f8f9fa',
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ 
-                        width: '48px', 
-                        height: '48px', 
-                        border: '4px solid #e5e7eb', 
+                    <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '4px solid #e5e7eb',
                         borderTop: '4px solid #3b82f6',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',
@@ -331,9 +331,9 @@ export default function Dashboard() {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {registrosHoy.map(r => (
-                                    <div key={r.id} style={{ 
-                                        padding: '1.5rem', 
-                                        background: '#f8fafc', 
+                                    <div key={r.id} style={{
+                                        padding: '1.5rem',
+                                        background: '#f8fafc',
                                         borderRadius: '8px',
                                         border: '1px solid #e5e7eb'
                                     }}>
@@ -380,7 +380,7 @@ export default function Dashboard() {
     return (
         <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
             <Navbar user={user} />
-            
+
             <div className="container" style={{
                 maxWidth: '1400px',
                 margin: '0 auto',
@@ -413,7 +413,7 @@ export default function Dashboard() {
                                 {formatearFecha(horaActual)}
                             </p>
                         </div>
-                        <div style={{ 
+                        <div style={{
                             textAlign: 'center',
                             background: 'rgba(255,255,255,0.1)',
                             backdropFilter: 'blur(10px)',
@@ -564,9 +564,9 @@ export default function Dashboard() {
                     border: '1px solid #e5e7eb',
                     marginBottom: '2rem'
                 }}>
-                    <h3 style={{ 
-                        margin: '0 0 1.5rem 0', 
-                        fontSize: '1.25rem', 
+                    <h3 style={{
+                        margin: '0 0 1.5rem 0',
+                        fontSize: '1.25rem',
                         fontWeight: '700',
                         color: '#111827',
                         display: 'flex',
@@ -576,9 +576,9 @@ export default function Dashboard() {
                         <span>⚡</span> Acciones Rápidas
                     </h3>
 
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
                         gap: '1.5rem'
                     }}>
                         <Link href="/empleados" className="action-card" style={{
@@ -654,9 +654,9 @@ export default function Dashboard() {
                         </Link>
                     </div>
 
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
                         gap: '1.5rem',
                         marginTop: '1.5rem'
                     }}>
@@ -712,15 +712,15 @@ export default function Dashboard() {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                     border: '1px solid #e5e7eb'
                 }}>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                         marginBottom: '1.5rem'
                     }}>
-                        <h3 style={{ 
-                            margin: 0, 
-                            fontSize: '1.25rem', 
+                        <h3 style={{
+                            margin: 0,
+                            fontSize: '1.25rem',
                             fontWeight: '700',
                             color: '#111827',
                             display: 'flex',
@@ -729,13 +729,13 @@ export default function Dashboard() {
                         }}>
                             <span>📋</span> Actividad de Hoy
                         </h3>
-                        <button 
-                            onClick={recargarDatos} 
+                        <button
+                            onClick={recargarDatos}
                             className="refresh-btn"
-                            style={{ 
-                                background: '#f3f4f6', 
-                                border: 'none', 
-                                cursor: 'pointer', 
+                            style={{
+                                background: '#f3f4f6',
+                                border: 'none',
+                                cursor: 'pointer',
                                 fontSize: '1.2rem',
                                 padding: '0.5rem 0.75rem',
                                 borderRadius: '8px'
@@ -747,10 +747,10 @@ export default function Dashboard() {
 
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                            <div style={{ 
-                                width: '48px', 
-                                height: '48px', 
-                                border: '4px solid #e5e7eb', 
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                border: '4px solid #e5e7eb',
                                 borderTop: '4px solid #3b82f6',
                                 borderRadius: '50%',
                                 animation: 'spin 1s linear infinite',
@@ -771,54 +771,54 @@ export default function Dashboard() {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             {registrosHoy.slice(0, 10).map(r => (
-                                <div key={r.id} className="activity-item" style={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between', 
+                                <div key={r.id} className="activity-item" style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    padding: '1.25rem', 
-                                    background: '#f8fafc', 
+                                    padding: '1.25rem',
+                                    background: '#f8fafc',
                                     borderRadius: '10px',
                                     border: '1px solid #e5e7eb'
                                 }}>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
-                                        <div style={{ 
-                                            width: 48, 
-                                            height: 48, 
+                                        <div style={{
+                                            width: 48,
+                                            height: 48,
                                             minWidth: 48,
-                                            borderRadius: '12px', 
-                                            background: r.hora_salida 
-                                                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' 
-                                                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center', 
+                                            borderRadius: '12px',
+                                            background: r.hora_salida
+                                                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                                                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                             fontWeight: '700',
                                             color: 'white',
                                             fontSize: '1rem',
-                                            boxShadow: r.hora_salida 
-                                                ? '0 4px 12px rgba(239, 68, 68, 0.3)' 
+                                            boxShadow: r.hora_salida
+                                                ? '0 4px 12px rgba(239, 68, 68, 0.3)'
                                                 : '0 4px 12px rgba(16, 185, 129, 0.3)'
                                         }}>
-                                            {r.empleados?.nombre?.[0]}{r.empleados?.apellido?.[0]}
+                                            {(r.empleados?.nombre?.[0] || '?')}{(r.empleados?.apellido?.[0] || '')}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ 
-                                                fontWeight: '600', 
+                                            <div style={{
+                                                fontWeight: '600',
                                                 fontSize: '1rem',
                                                 color: '#111827',
                                                 marginBottom: '0.25rem'
                                             }}>
-                                                {r.empleados?.nombre} {r.empleados?.apellido}
+                                                {r.empleados?.nombre || 'Empleado'} {r.empleados?.apellido || 'Desconocido'}
                                             </div>
-                                            <div style={{ 
-                                                fontSize: '0.85rem', 
+                                            <div style={{
+                                                fontSize: '0.85rem',
                                                 color: '#6b7280',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '0.5rem',
                                                 flexWrap: 'wrap'
                                             }}>
-                                                <span>{r.empleados?.cargo}</span>
+                                                <span>{r.empleados?.cargo || 'Sin cargo'}</span>
                                                 <span style={{
                                                     background: r.hora_salida ? '#fee2e2' : '#d1fae5',
                                                     color: r.hora_salida ? '#991b1b' : '#065f46',
@@ -833,14 +833,14 @@ export default function Dashboard() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div style={{ 
+                                    <div style={{
                                         textAlign: 'right',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         gap: '0.25rem'
                                     }}>
-                                        <div style={{ 
-                                            color: '#059669', 
+                                        <div style={{
+                                            color: '#059669',
                                             fontFamily: 'monospace',
                                             fontWeight: '700',
                                             fontSize: '0.95rem'
@@ -849,8 +849,8 @@ export default function Dashboard() {
                                             {r.hora_entrada}
                                         </div>
                                         {r.hora_salida && (
-                                            <div style={{ 
-                                                color: '#dc2626', 
+                                            <div style={{
+                                                color: '#dc2626',
                                                 fontFamily: 'monospace',
                                                 fontWeight: '700',
                                                 fontSize: '0.95rem'
@@ -862,15 +862,15 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             ))}
-                            
+
                             {registrosHoy.length > 10 && (
-                                <div style={{ 
-                                    textAlign: 'center', 
+                                <div style={{
+                                    textAlign: 'center',
                                     padding: '1rem',
                                     color: '#6b7280',
                                     fontSize: '0.9rem'
                                 }}>
-                                    Mostrando 10 de {registrosHoy.length} registros. 
+                                    Mostrando 10 de {registrosHoy.length} registros.
                                     <Link href="/reportes" style={{ color: '#3b82f6', marginLeft: '0.5rem', fontWeight: '600' }}>
                                         Ver todos →
                                     </Link>
