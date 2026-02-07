@@ -107,48 +107,49 @@ export default function Dashboard() {
     }
 
     return (
-        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', overflowX: 'hidden' }}>
             <Navbar user={user} />
 
             <div className="container" style={{
                 maxWidth: '1200px',
                 margin: '0 auto',
-                padding: isMobile ? '1rem' : '1.5rem',
-                boxSizing: 'border-box'
+                padding: isMobile ? '0.75rem' : '1.5rem',
+                boxSizing: 'border-box',
+                width: '100%',
+                overflowX: 'hidden'
             }}>
                 {/* Header con reloj */}
                 <div style={{
                     background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-                    borderRadius: '12px',
-                    padding: isMobile ? '1.25rem' : '2rem',
+                    borderRadius: '4px',
+                    padding: isMobile ? '1rem' : '1.5rem',
                     color: 'white',
-                    marginBottom: '1.5rem',
-                    boxShadow: '0 4px 15px rgba(30, 60, 114, 0.2)',
-                    position: 'relative',
-                    overflow: 'hidden'
+                    marginBottom: '1rem',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    width: '100%',
+                    boxSizing: 'border-box'
                 }}>
-                    {/* ... (Header Content Same as before) ... */}
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexDirection: isMobile ? 'column' : 'row',
                         textAlign: isMobile ? 'center' : 'left',
-                        gap: '1rem'
+                        gap: '0.75rem'
                     }}>
                         <div>
-                            <h1 style={{ margin: '0 0 0.25rem 0', fontSize: isMobile ? '1.5rem' : '1.75rem', fontWeight: '700' }}>
+                            <h1 style={{ margin: '0 0 0.25rem 0', fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: '600' }}>
                                 Hola, {user?.nombre || 'Usuario'}
                             </h1>
-                            <p style={{ margin: 0, opacity: 0.9, fontSize: '0.875rem' }}>
+                            <p style={{ margin: 0, opacity: 0.9, fontSize: '0.8rem' }}>
                                 {formatearFecha(horaActual)}
                             </p>
                         </div>
                         <div style={{ textAlign: isMobile ? 'center' : 'right' }}>
-                            <div style={{ fontSize: isMobile ? '2rem' : '2.5rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace', letterSpacing: '1px' }}>
+                            <div style={{ fontSize: isMobile ? '1.75rem' : '2rem', fontWeight: '700', lineHeight: 1, fontFamily: 'monospace' }}>
                                 {formatearHora(horaActual)}
                             </div>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.9, marginTop: '0.25rem', textTransform: 'uppercase' }}>
                                 {user?.rol === 'admin' ? 'Administrador' : 'Empleado'}
                             </div>
                         </div>
@@ -188,100 +189,121 @@ export default function Dashboard() {
                 {/* Stats Grid */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: isMobile ? '0.75rem' : '1.25rem',
-                    marginBottom: '1.5rem'
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                    gap: '0.75rem',
+                    marginBottom: '1rem',
+                    width: '100%',
+                    boxSizing: 'border-box'
                 }}>
                     <div className="card" style={{ 
-                        padding: isMobile ? '1.25rem' : '1.5rem', 
+                        padding: '1rem', 
                         marginBottom: 0, 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: isMobile ? '0.75rem' : '1rem' 
+                        gap: '0.75rem',
+                        borderRadius: '4px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ 
-                            fontSize: isMobile ? '1.25rem' : '1.5rem', 
+                            fontSize: '1.25rem', 
                             background: '#10b981', 
                             color: 'white', 
-                            width: isMobile ? 40 : 48, 
-                            height: isMobile ? 40 : 48, 
-                            minWidth: isMobile ? 40 : 48,
-                            borderRadius: 8, 
+                            width: 36, 
+                            height: 36, 
+                            minWidth: 36,
+                            borderRadius: '4px', 
                             display: 'flex', 
                             alignItems: 'center', 
                             justifyContent: 'center' 
                         }}>✓</div>
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: isMobile ? '0.8rem' : '0.875rem', color: '#6b7280' }}>Presentes</div>
-                            <div style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: '600' }}>{empleadosPresentes}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Presentes</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{empleadosPresentes}</div>
                         </div>
                     </div>
 
                     <div className="card" style={{ 
-                        padding: isMobile ? '1.25rem' : '1.5rem', 
+                        padding: '1rem', 
                         marginBottom: 0, 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: isMobile ? '0.75rem' : '1rem' 
+                        gap: '0.75rem',
+                        borderRadius: '4px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ 
-                            fontSize: isMobile ? '1.25rem' : '1.5rem', 
+                            fontSize: '1.25rem', 
                             background: '#ef4444', 
                             color: 'white', 
-                            width: isMobile ? 40 : 48, 
-                            height: isMobile ? 40 : 48, 
-                            minWidth: isMobile ? 40 : 48,
-                            borderRadius: 8, 
+                            width: 36, 
+                            height: 36, 
+                            minWidth: 36,
+                            borderRadius: '4px', 
                             display: 'flex', 
                             alignItems: 'center', 
                             justifyContent: 'center' 
                         }}>←</div>
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: isMobile ? '0.8rem' : '0.875rem', color: '#6b7280' }}>Salieron</div>
-                            <div style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: '600' }}>{empleadosSalieron}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Salieron</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{empleadosSalieron}</div>
                         </div>
                     </div>
 
                     <div className="card" style={{ 
-                        padding: isMobile ? '1.25rem' : '1.5rem', 
+                        padding: '1rem', 
                         marginBottom: 0, 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: isMobile ? '0.75rem' : '1rem' 
+                        gap: '0.75rem',
+                        borderRadius: '4px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        border: '1px solid #e5e7eb'
                     }}>
                         <div style={{ 
-                            fontSize: isMobile ? '1.25rem' : '1.5rem', 
+                            fontSize: '1.25rem', 
                             background: '#3b82f6', 
                             color: 'white', 
-                            width: isMobile ? 40 : 48, 
-                            height: isMobile ? 40 : 48, 
-                            minWidth: isMobile ? 40 : 48,
-                            borderRadius: 8, 
+                            width: 36, 
+                            height: 36, 
+                            minWidth: 36,
+                            borderRadius: '4px', 
                             display: 'flex', 
                             alignItems: 'center', 
                             justifyContent: 'center' 
                         }}>#</div>
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: isMobile ? '0.8rem' : '0.875rem', color: '#6b7280' }}>Total Hoy</div>
-                            <div style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: '600' }}>{totalRegistros}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.15rem' }}>Total Hoy</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{totalRegistros}</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Acciones Rápidas */}
-                <div className="card" style={{ padding: isMobile ? '1.25rem' : '1.75rem', marginBottom: '2rem' }}>
+                <div className="card" style={{ 
+                    padding: isMobile ? '1rem' : '1.25rem', 
+                    marginBottom: '1rem',
+                    borderRadius: '4px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    border: '1px solid #e5e7eb',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                }}>
                     <h3 style={{ 
-                        margin: '0 0 1.25rem 0', 
-                        fontSize: isMobile ? '1rem' : '1.125rem', 
-                        fontWeight: '600' 
+                        margin: '0 0 0.75rem 0', 
+                        fontSize: isMobile ? '0.9rem' : '1rem', 
+                        fontWeight: '600',
+                        color: '#374151'
                     }}>
                         {user?.rol === 'admin' ? 'Panel de Administración' : 'Acciones Rápidas'}
                     </h3>
 
                     <div style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
-                        gap: isMobile ? '0.75rem' : '1rem' 
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
+                        gap: '0.75rem',
+                        width: '100%'
                     }}>
                         {/* BOTÓN FICHAR - SOLO PARA NO ADMINS */}
                         {user?.rol !== 'admin' && (
@@ -289,41 +311,41 @@ export default function Dashboard() {
                                 textDecoration: 'none',
                                 background: '#fbbf24',
                                 color: '#1e3a8a',
-                                padding: isMobile ? '1.25rem' : '1.75rem',
-                                borderRadius: isMobile ? '12px' : '16px',
+                                padding: '1rem',
+                                borderRadius: '4px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: isMobile ? '0.75rem' : '1.25rem',
-                                fontWeight: 'bold',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                fontSize: isMobile ? '1rem' : '1.2rem',
+                                gap: '0.75rem',
+                                fontWeight: '600',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                fontSize: '0.9rem',
                                 transition: 'transform 0.2s'
                             }}>
-                                <span style={{ fontSize: isMobile ? '1.75rem' : '2rem' }}>⏱️</span>
+                                <span style={{ fontSize: '1.5rem' }}>⏱️</span>
                                 <div>{isMobile ? 'FICHAR' : 'REGISTRAR HORARIO'}</div>
                             </Link>
                         )}
 
-                        {/* BOTONES ADMIN - REEMPLAZAN AL DE FICHAR */}
+                        {/* BOTONES ADMIN */}
                         {user?.rol === 'admin' && (
                             <>
                                 <Link href="/empleados" style={{
                                     textDecoration: 'none',
                                     background: '#10b981',
                                     color: 'white',
-                                    padding: isMobile ? '1.25rem' : '1.75rem',
-                                    borderRadius: isMobile ? '12px' : '16px',
+                                    padding: '1rem',
+                                    borderRadius: '4px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: isMobile ? '0.75rem' : '1.25rem',
-                                    fontWeight: 'bold',
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                    fontSize: isMobile ? '0.95rem' : '1.1rem',
+                                    gap: '0.75rem',
+                                    fontWeight: '600',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                    fontSize: '0.9rem',
                                     transition: 'transform 0.2s'
                                 }}>
-                                    <span style={{ fontSize: isMobile ? '1.75rem' : '2rem' }}>👥</span>
+                                    <span style={{ fontSize: '1.5rem' }}>👥</span>
                                     <div>{isMobile ? 'EMPLEADOS' : 'GESTIONAR USUARIOS'}</div>
                                 </Link>
 
@@ -331,18 +353,18 @@ export default function Dashboard() {
                                     textDecoration: 'none',
                                     background: '#3b82f6',
                                     color: 'white',
-                                    padding: isMobile ? '1.25rem' : '1.75rem',
-                                    borderRadius: isMobile ? '12px' : '16px',
+                                    padding: '1rem',
+                                    borderRadius: '4px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: isMobile ? '0.75rem' : '1.25rem',
-                                    fontWeight: 'bold',
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                    fontSize: isMobile ? '0.95rem' : '1.1rem',
+                                    gap: '0.75rem',
+                                    fontWeight: '600',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                    fontSize: '0.9rem',
                                     transition: 'transform 0.2s'
                                 }}>
-                                    <span style={{ fontSize: isMobile ? '1.75rem' : '2rem' }}>📊</span>
+                                    <span style={{ fontSize: '1.5rem' }}>📊</span>
                                     <div>{isMobile ? 'REPORTES' : 'VER REPORTES'}</div>
                                 </Link>
                             </>
