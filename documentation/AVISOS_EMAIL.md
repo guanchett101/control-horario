@@ -529,9 +529,64 @@ Esto debería:
 
 ---
 
-## 📝 PASO 6: Configuración Avanzada (Opcional)
+## 📝 PASO 6: Activar/Desactivar Empleados para Pruebas
 
-### 6.1 Múltiples Horarios de Aviso
+### 6.1 Funcionalidad Implementada
+
+Ahora puedes **activar o desactivar empleados** desde la página `/empleados`. Esto te permite:
+
+- ✅ Hacer pruebas solo con un empleado (tú mismo)
+- ✅ Desactivar temporalmente empleados sin eliminarlos
+- ✅ Controlar quién recibe notificaciones por email
+
+### 6.2 Cómo Usar
+
+1. Ve a la página **Empleados** en el admin
+2. Verás un botón de estado en cada empleado:
+   - **✅ Activo** (verde): El empleado recibe notificaciones
+   - **⏸️ Inactivo** (gris): El empleado NO recibe notificaciones
+3. Haz clic en el botón para cambiar el estado
+4. Confirma la acción en el diálogo
+
+### 6.3 Vista Móvil
+
+En móvil, el botón aparece en la parte superior de cada tarjeta de empleado:
+- Botón ancho que muestra el estado actual
+- Color verde si está activo, gris si está inactivo
+
+### 6.4 Vista Escritorio
+
+En escritorio, el botón aparece en la columna "Acciones":
+- Botón compacto con icono (✅ o ⏸️)
+- Junto a los botones de Editar y Eliminar
+
+### 6.5 Comportamiento del Sistema
+
+El sistema de avisos por email **solo envía notificaciones a empleados activos**:
+
+```javascript
+// En la API de verificar-fichajes
+const { data: empleados } = await supabase
+  .from('empleados')
+  .select('*')
+  .eq('activo', true);  // ← Solo empleados activos
+```
+
+### 6.6 Ejemplo de Uso para Pruebas
+
+**Escenario**: Quieres probar el sistema solo contigo
+
+1. Ve a `/empleados`
+2. Desactiva todos los empleados excepto el tuyo
+3. Espera a que se ejecute el cron (o prueba manualmente)
+4. Solo tú recibirás el email de prueba
+5. Una vez verificado, reactiva a los demás empleados
+
+---
+
+## 📝 PASO 7: Configuración Avanzada (Opcional)
+
+### 7.1 Múltiples Horarios de Aviso
 
 Si quieres avisar a las 10:00 AM y a las 14:00 PM:
 
@@ -551,7 +606,7 @@ SELECT cron.schedule(
 );
 ```
 
-### 6.2 Solo Días Laborables (Lunes a Viernes)
+### 7.2 Solo Días Laborables (Lunes a Viernes)
 
 ```sql
 -- Solo de lunes a viernes
@@ -562,7 +617,7 @@ SELECT cron.schedule(
 );
 ```
 
-### 6.3 Desactivar un Cron Job
+### 7.3 Desactivar un Cron Job
 
 ```sql
 -- Ver ID del job
@@ -575,7 +630,7 @@ SELECT cron.unschedule(1);  -- Reemplaza 1 con el jobid real
 SELECT cron.unschedule('verificar-fichajes-10am');
 ```
 
-### 6.4 Ver Historial de Ejecuciones
+### 7.4 Ver Historial de Ejecuciones
 
 ```sql
 -- Ver últimas ejecuciones del cron
