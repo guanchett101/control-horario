@@ -775,98 +775,106 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {registrosHoy.filter(r => r && typeof r === 'object').slice(0, 10).map((r, index) => (
-                                <div key={r.id || index} className="activity-item" style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '1.25rem',
-                                    background: '#f8fafc',
-                                    borderRadius: '10px',
-                                    border: '1px solid #e5e7eb'
-                                }}>
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
-                                        <div style={{
-                                            width: 48,
-                                            height: 48,
-                                            minWidth: 48,
-                                            borderRadius: '12px',
-                                            background: r.hora_salida
-                                                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                                                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: '700',
-                                            color: 'white',
-                                            fontSize: '1rem',
-                                            boxShadow: r.hora_salida
-                                                ? '0 4px 12px rgba(239, 68, 68, 0.3)'
-                                                : '0 4px 12px rgba(16, 185, 129, 0.3)'
-                                        }}>
-                                            {(r.empleados?.nombre?.[0] || '?')}{(r.empleados?.apellido?.[0] || '')}
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
+                            {isMobile ? (
+                                <div style={{ padding: '1rem', background: '#ffebee', color: '#c62828', borderRadius: '8px', textAlign: 'center' }}>
+                                    <h3 style={{ margin: '0 0 0.5rem' }}>⚠️ Modo Diagnóstico</h3>
+                                    <p>Lista desactivada temporalmente para aislar el error.</p>
+                                    <p>Registros cargados: {registrosHoy.length}</p>
+                                </div>
+                            ) : (
+                                registrosHoy.filter(r => r && typeof r === 'object').slice(0, 10).map((r, index) => (
+                                    <div key={r.id || index} className="activity-item" style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1.25rem',
+                                        background: '#f8fafc',
+                                        borderRadius: '10px',
+                                        border: '1px solid #e5e7eb'
+                                    }}>
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
                                             <div style={{
-                                                fontWeight: '600',
-                                                fontSize: '1rem',
-                                                color: '#111827',
-                                                marginBottom: '0.25rem'
-                                            }}>
-                                                {r.empleados?.nombre || 'Empleado'} {r.empleados?.apellido || 'Desconocido'}
-                                            </div>
-                                            <div style={{
-                                                fontSize: '0.85rem',
-                                                color: '#6b7280',
+                                                width: 48,
+                                                height: 48,
+                                                minWidth: 48,
+                                                borderRadius: '12px',
+                                                background: r.hora_salida
+                                                    ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                                                    : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '0.5rem',
-                                                flexWrap: 'wrap'
+                                                justifyContent: 'center',
+                                                fontWeight: '700',
+                                                color: 'white',
+                                                fontSize: '1rem',
+                                                boxShadow: r.hora_salida
+                                                    ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                                                    : '0 4px 12px rgba(16, 185, 129, 0.3)'
                                             }}>
-                                                <span>{r.empleados?.cargo || 'Sin cargo'}</span>
-                                                <span style={{
-                                                    background: r.hora_salida ? '#fee2e2' : '#d1fae5',
-                                                    color: r.hora_salida ? '#991b1b' : '#065f46',
-                                                    padding: '0.15rem 0.5rem',
-                                                    borderRadius: '6px',
-                                                    fontSize: '0.7rem',
+                                                {(r.empleados?.nombre?.[0] || '?')}{(r.empleados?.apellido?.[0] || '')}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{
                                                     fontWeight: '600',
-                                                    textTransform: 'uppercase'
+                                                    fontSize: '1rem',
+                                                    color: '#111827',
+                                                    marginBottom: '0.25rem'
                                                 }}>
-                                                    {r.hora_salida ? 'Salió' : 'Presente'}
-                                                </span>
+                                                    {r.empleados?.nombre || 'Empleado'} {r.empleados?.apellido || 'Desconocido'}
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '0.85rem',
+                                                    color: '#6b7280',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    flexWrap: 'wrap'
+                                                }}>
+                                                    <span>{r.empleados?.cargo || 'Sin cargo'}</span>
+                                                    <span style={{
+                                                        background: r.hora_salida ? '#fee2e2' : '#d1fae5',
+                                                        color: r.hora_salida ? '#991b1b' : '#065f46',
+                                                        padding: '0.15rem 0.5rem',
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: '600',
+                                                        textTransform: 'uppercase'
+                                                    }}>
+                                                        {r.hora_salida ? 'Salió' : 'Presente'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div style={{
-                                        textAlign: 'right',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '0.25rem'
-                                    }}>
                                         <div style={{
-                                            color: '#059669',
-                                            fontFamily: 'monospace',
-                                            fontWeight: '700',
-                                            fontSize: '0.95rem'
+                                            textAlign: 'right',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '0.25rem'
                                         }}>
-                                            <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>ENT </span>
-                                            {r.hora_entrada}
-                                        </div>
-                                        {r.hora_salida && (
                                             <div style={{
-                                                color: '#dc2626',
+                                                color: '#059669',
                                                 fontFamily: 'monospace',
                                                 fontWeight: '700',
                                                 fontSize: '0.95rem'
                                             }}>
-                                                <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>SAL </span>
-                                                {r.hora_salida}
+                                                <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>ENT </span>
+                                                {r.hora_entrada}
                                             </div>
-                                        )}
+                                            {r.hora_salida && (
+                                                <div style={{
+                                                    color: '#dc2626',
+                                                    fontFamily: 'monospace',
+                                                    fontWeight: '700',
+                                                    fontSize: '0.95rem'
+                                                }}>
+                                                    <span style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '500' }}>SAL </span>
+                                                    {r.hora_salida}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
 
                             {registrosHoy.length > 10 && (
                                 <div style={{
