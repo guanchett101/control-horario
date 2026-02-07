@@ -5,8 +5,29 @@ import { usePathname, useRouter } from 'next/navigation';
 
 function Navbar({ user, onLogout }) {
     const [isMobile, setIsMobile] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+
+    // Sincronizar usuario desde localStorage y props
+    useEffect(() => {
+        setMounted(true);
+        
+        // Priorizar prop user, pero verificar localStorage como backup
+        if (user) {
+            setCurrentUser(user);
+        } else {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                try {
+                    setCurrentUser(JSON.parse(storedUser));
+                } catch (e) {
+                    console.error('Error parsing user:', e);
+                }
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -16,6 +37,11 @@ function Navbar({ user, onLogout }) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Evitar hidratación incorrecta
+    if (!mounted) {
+        return null;
+    }
 
     const isActive = (path) => pathname === path;
 
@@ -60,7 +86,7 @@ function Navbar({ user, onLogout }) {
                     {isMobile ? '⏱️' : 'Registro'}
                 </Link>
 
-                {user?.rol === 'admin' && (
+                {currentUser?.rol === 'admin' && (
                     <>
                         <Link
                             href="/empleados"
@@ -97,14 +123,14 @@ function Navbar({ user, onLogout }) {
                 {/* Separador visual en desktop */}
                 {!isMobile && <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>}
 
-                {!isMobile && (
+                {!isMobile && currentUser && (
                     <span style={{
                         fontSize: '0.85rem',
                         fontWeight: '600',
                         color: 'rgba(255,255,255,0.9)',
                         marginRight: '0.5rem'
                     }}>
-                        {user?.nombre}
+                        {currentUser.nombre}
                     </span>
                 )}
 
