@@ -44,20 +44,26 @@ export default function Dashboard() {
 
     // Segundo useEffect: Detectar móvil y configurar reloj
     useEffect(() => {
-        try {
-            const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            setIsMobile(checkMobile);
-            setIsReady(true);
+        // Esperar a que el DOM esté completamente listo
+        const timer = setTimeout(() => {
+            try {
+                const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                setIsMobile(checkMobile);
+                setIsReady(true);
 
-            const interval = setInterval(() => {
-                setHoraActual(new Date());
-            }, 1000);
+                const interval = setInterval(() => {
+                    setHoraActual(new Date());
+                }, 1000);
 
-            return () => clearInterval(interval);
-        } catch (e) {
-            console.error('Error en configuración inicial:', e);
-            setIsReady(true);
-        }
+                return () => clearInterval(interval);
+            } catch (e) {
+                console.error('Error en configuración inicial:', e);
+                setIsMobile(false);
+                setIsReady(true);
+            }
+        }, 100); // Pequeño delay para Chrome móvil
+
+        return () => clearTimeout(timer);
     }, []);
 
     // Tercer useEffect: Cargar datos cuando user esté disponible
