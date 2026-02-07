@@ -451,135 +451,385 @@ export default function EmpleadosPage() {
 
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                            Cargando...
+                            <div style={{ 
+                                width: '48px', 
+                                height: '48px', 
+                                border: '4px solid #e5e7eb', 
+                                borderTop: '4px solid #3b82f6',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite',
+                                margin: '0 auto 1rem'
+                            }}></div>
+                            Cargando empleados...
                         </div>
                     ) : empleados.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
-                            No hay empleados registrados
+                            <div style={{ 
+                                fontSize: '4rem', 
+                                marginBottom: '1rem',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                opacity: 0.6
+                            }}>👥</div>
+                            <p style={{ fontSize: '1.1rem', fontWeight: '500', color: '#374151' }}>No hay empleados registrados</p>
+                            <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginTop: '0.5rem' }}>Haz clic en "+ Nuevo Empleado" para comenzar</p>
                         </div>
                     ) : isMobile ? (
-                        // Vista de tarjetas para móvil
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '100%' }}>
-                            {empleados.map((emp) => (
-                                <div key={emp.id} style={{
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '8px',
-                                    padding: '1rem',
-                                    background: '#fef3c7',
-                                    maxWidth: '100%',
-                                    boxSizing: 'border-box',
-                                    overflowWrap: 'break-word'
-                                }}>
-                                    <div style={{ marginBottom: '0.75rem' }}>
-                                        <div style={{ fontWeight: '600', fontSize: '1rem', color: '#111827', marginBottom: '0.25rem', wordBreak: 'break-word' }}>
-                                            {emp.nombre} {emp.apellido}
+                        // Vista de tarjetas para móvil - MEJORADA
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', maxWidth: '100%' }}>
+                            {empleados.map((emp) => {
+                                const iniciales = `${emp.nombre?.[0] || ''}${emp.apellido?.[0] || ''}`.toUpperCase();
+                                const colores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                                const colorAvatar = colores[emp.id % colores.length];
+                                
+                                return (
+                                    <div key={emp.id} style={{
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: '4px',
+                                        padding: '1rem',
+                                        background: 'white',
+                                        maxWidth: '100%',
+                                        boxSizing: 'border-box',
+                                        overflowWrap: 'break-word',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                        transition: 'all 0.2s',
+                                        cursor: 'pointer'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'}
+                                    >
+                                        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem', alignItems: 'center' }}>
+                                            <div style={{
+                                                width: '48px',
+                                                height: '48px',
+                                                minWidth: '48px',
+                                                borderRadius: '4px',
+                                                background: colorAvatar,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'white',
+                                                fontWeight: '700',
+                                                fontSize: '1.1rem',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            }}>
+                                                {iniciales}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ 
+                                                    fontWeight: '600', 
+                                                    fontSize: '1rem', 
+                                                    color: '#111827', 
+                                                    marginBottom: '0.15rem', 
+                                                    wordBreak: 'break-word',
+                                                    lineHeight: 1.3
+                                                }}>
+                                                    {emp.nombre} {emp.apellido}
+                                                </div>
+                                                <div style={{ 
+                                                    fontSize: '0.8rem', 
+                                                    color: '#6b7280', 
+                                                    wordBreak: 'break-word',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.35rem'
+                                                }}>
+                                                    <span style={{ fontSize: '0.7rem' }}>💼</span>
+                                                    {emp.cargo}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div style={{ fontSize: '0.85rem', color: '#6b7280', wordBreak: 'break-word' }}>
-                                            {emp.cargo}
+
+                                        {(emp.email || emp.telefono) && (
+                                            <div style={{ 
+                                                fontSize: '0.8rem', 
+                                                color: '#6b7280', 
+                                                marginBottom: '0.75rem', 
+                                                wordBreak: 'break-all',
+                                                background: '#f9fafb',
+                                                padding: '0.5rem',
+                                                borderRadius: '4px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '0.35rem'
+                                            }}>
+                                                {emp.email && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span style={{ fontSize: '0.9rem' }}>📧</span>
+                                                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.email}</span>
+                                                    </div>
+                                                )}
+                                                {emp.telefono && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span style={{ fontSize: '0.9rem' }}>📱</span>
+                                                        <span>{emp.telefono}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%' }}>
+                                            <button
+                                                onClick={() => editarEmpleado(emp)}
+                                                style={{
+                                                    flex: 1,
+                                                    background: '#3b82f6',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.6rem',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    minWidth: 0,
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                    transition: 'all 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '0.35rem'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#2563eb'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = '#3b82f6'}
+                                            >
+                                                <span>✏️</span> Editar
+                                            </button>
+                                            <button
+                                                onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
+                                                style={{
+                                                    flex: 1,
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.6rem',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    minWidth: 0,
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                    transition: 'all 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '0.35rem'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = '#ef4444'}
+                                            >
+                                                <span>🗑️</span> Eliminar
+                                            </button>
                                         </div>
                                     </div>
-
-                                    {(emp.email || emp.telefono) && (
-                                        <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem', wordBreak: 'break-all' }}>
-                                            {emp.email && <div>📧 {emp.email}</div>}
-                                            {emp.telefono && <div>📱 {emp.telefono}</div>}
-                                        </div>
-                                    )}
-
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%' }}>
-                                        <button
-                                            onClick={() => editarEmpleado(emp)}
-                                            style={{
-                                                flex: 1,
-                                                background: '#3b82f6',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.5rem',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '500',
-                                                minWidth: 0
-                                            }}
-                                        >
-                                            ✏️ Editar
-                                        </button>
-                                        <button
-                                            onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
-                                            style={{
-                                                flex: 1,
-                                                background: '#ef4444',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.5rem',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '500',
-                                                minWidth: 0
-                                            }}
-                                        >
-                                            🗑️ Eliminar
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     ) : (
-                        // Vista de tabla para escritorio
-                        <div className="table-responsive">
-                            <table className="table">
+                        // Vista de tabla para escritorio - MEJORADA
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ 
+                                width: '100%', 
+                                borderCollapse: 'separate', 
+                                borderSpacing: 0,
+                                fontSize: '0.9rem'
+                            }}>
                                 <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nombre Completo</th>
-                                        <th>Email</th>
-                                        <th>Teléfono</th>
-                                        <th>Cargo</th>
-                                        <th>Fecha Ingreso</th>
-                                        <th>Acciones</th>
+                                    <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                                        <th style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            textAlign: 'left', 
+                                            fontSize: '0.75rem', 
+                                            textTransform: 'uppercase', 
+                                            color: '#6b7280', 
+                                            fontWeight: '600',
+                                            letterSpacing: '0.5px'
+                                        }}>Empleado</th>
+                                        <th style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            textAlign: 'left', 
+                                            fontSize: '0.75rem', 
+                                            textTransform: 'uppercase', 
+                                            color: '#6b7280', 
+                                            fontWeight: '600',
+                                            letterSpacing: '0.5px'
+                                        }}>Contacto</th>
+                                        <th style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            textAlign: 'left', 
+                                            fontSize: '0.75rem', 
+                                            textTransform: 'uppercase', 
+                                            color: '#6b7280', 
+                                            fontWeight: '600',
+                                            letterSpacing: '0.5px'
+                                        }}>Cargo</th>
+                                        <th style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            textAlign: 'center', 
+                                            fontSize: '0.75rem', 
+                                            textTransform: 'uppercase', 
+                                            color: '#6b7280', 
+                                            fontWeight: '600',
+                                            letterSpacing: '0.5px'
+                                        }}>Fecha Ingreso</th>
+                                        <th style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            textAlign: 'center', 
+                                            fontSize: '0.75rem', 
+                                            textTransform: 'uppercase', 
+                                            color: '#6b7280', 
+                                            fontWeight: '600',
+                                            letterSpacing: '0.5px'
+                                        }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {empleados.map((emp) => (
-                                        <tr key={emp.id}>
-                                            <td>{emp.id}</td>
-                                            <td style={{ fontWeight: '600' }}>{emp.nombre} {emp.apellido}</td>
-                                            <td>{emp.email || '-'}</td>
-                                            <td>{emp.telefono || '-'}</td>
-                                            <td>{emp.cargo}</td>
-                                            <td>{emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString('es-ES') : '-'}</td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button
-                                                        onClick={() => editarEmpleado(emp)}
-                                                        className="btn"
-                                                        style={{
-                                                            background: '#3b82f6',
+                                    {empleados.map((emp, index) => {
+                                        const iniciales = `${emp.nombre?.[0] || ''}${emp.apellido?.[0] || ''}`.toUpperCase();
+                                        const colores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                                        const colorAvatar = colores[emp.id % colores.length];
+                                        
+                                        return (
+                                            <tr key={emp.id} style={{ 
+                                                borderBottom: '1px solid #f3f4f6',
+                                                background: index % 2 === 0 ? 'white' : '#fafbfc',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f0f9ff'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#fafbfc'}
+                                            >
+                                                <td style={{ padding: '0.85rem 1rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        <div style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            minWidth: '40px',
+                                                            borderRadius: '4px',
+                                                            background: colorAvatar,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
                                                             color: 'white',
-                                                            padding: '0.4rem 0.8rem',
-                                                            fontSize: '0.85rem'
-                                                        }}
-                                                    >
-                                                        ✏️ Editar
-                                                    </button>
-                                                    <button
-                                                        onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
-                                                        className="btn"
-                                                        style={{
-                                                            background: '#ef4444',
-                                                            color: 'white',
-                                                            padding: '0.4rem 0.8rem',
-                                                            fontSize: '0.85rem'
-                                                        }}
-                                                    >
-                                                        🗑️ Eliminar
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                            fontWeight: '700',
+                                                            fontSize: '0.9rem',
+                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            {iniciales}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', color: '#111827', fontSize: '0.95rem' }}>
+                                                                {emp.nombre} {emp.apellido}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                                                                ID: {emp.id}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.85rem 1rem' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                        {emp.email ? (
+                                                            <div style={{ fontSize: '0.85rem', color: '#4b5563', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                                                <span style={{ fontSize: '0.75rem' }}>📧</span>
+                                                                {emp.email}
+                                                            </div>
+                                                        ) : (
+                                                            <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>-</span>
+                                                        )}
+                                                        {emp.telefono && (
+                                                            <div style={{ fontSize: '0.85rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                                                <span style={{ fontSize: '0.75rem' }}>📱</span>
+                                                                {emp.telefono}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.85rem 1rem' }}>
+                                                    <div style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.35rem',
+                                                        background: '#f3f4f6',
+                                                        padding: '0.35rem 0.75rem',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.85rem',
+                                                        color: '#374151',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        <span style={{ fontSize: '0.75rem' }}>💼</span>
+                                                        {emp.cargo}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.85rem 1rem', textAlign: 'center', color: '#6b7280', fontSize: '0.85rem' }}>
+                                                    {emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString('es-ES', { 
+                                                        day: '2-digit', 
+                                                        month: 'short', 
+                                                        year: 'numeric' 
+                                                    }) : '-'}
+                                                </td>
+                                                <td style={{ padding: '0.85rem 1rem' }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                                        <button
+                                                            onClick={() => editarEmpleado(emp)}
+                                                            style={{
+                                                                background: '#3b82f6',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                padding: '0.5rem 0.85rem',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: '600',
+                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                                transition: 'all 0.2s',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.35rem'
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = '#2563eb';
+                                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = '#3b82f6';
+                                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                            }}
+                                                        >
+                                                            <span>✏️</span> Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
+                                                            style={{
+                                                                background: '#ef4444',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                padding: '0.5rem 0.85rem',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: '600',
+                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                                transition: 'all 0.2s',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.35rem'
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = '#dc2626';
+                                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = '#ef4444';
+                                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                            }}
+                                                        >
+                                                            <span>🗑️</span> Eliminar
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

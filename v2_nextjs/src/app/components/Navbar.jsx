@@ -76,6 +76,13 @@ function Navbar({ user, onLogout }) {
                         >
                             {isMobile ? '📊' : 'Reportes'}
                         </Link>
+                        <Link
+                            href="/visual"
+                            style={{ background: isActive('/visual') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
+                            title="Personalización Visual"
+                        >
+                            {isMobile ? '🎨' : 'Visual'}
+                        </Link>
                     </>
                 )}
 
