@@ -35,6 +35,24 @@ export async function PUT(request, { params }) {
     }
 }
 
+export async function PATCH(request, { params }) {
+    try {
+        const { id } = params;
+        const body = await request.json();
+        const { activo } = body;
+
+        const { error } = await supabase
+            .from('empleados')
+            .update({ activo })
+            .eq('id', id);
+
+        if (error) throw error;
+        return NextResponse.json({ message: 'Estado del empleado actualizado', activo });
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
 export async function DELETE(request, { params }) {
     try {
         const { id } = params;

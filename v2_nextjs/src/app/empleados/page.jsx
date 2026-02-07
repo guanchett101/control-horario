@@ -13,7 +13,8 @@ export default function EmpleadosPage() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editando, setEditando] = useState(null);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(null); // null hasta detectar
+    const [isReady, setIsReady] = useState(false);
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
@@ -193,6 +194,23 @@ export default function EmpleadosPage() {
                 cargarEmpleados();
             } catch (error) {
                 alert('❌ Error al eliminar: ' + (error.response?.data?.error || error.message));
+            }
+        }
+    };
+
+    const toggleActivoEmpleado = async (id, nombre, estadoActual) => {
+        const nuevoEstado = !estadoActual;
+        const accion = nuevoEstado ? 'activar' : 'desactivar';
+        
+        if (window.confirm(`¿Deseas ${accion} a ${nombre}?\n\n${nuevoEstado ? '✅ El empleado recibirá notificaciones por email' : '⚠️ El empleado NO recibirá notificaciones por email'}`)) {
+            try {
+                await axios.patch(`${API_URL}/empleados/${id}`, {
+                    activo: nuevoEstado
+                });
+                alert(`✅ Empleado ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
+                cargarEmpleados();
+            } catch (error) {
+                alert('❌ Error al cambiar estado: ' + (error.response?.data?.error || error.message));
             }
         }
     };
@@ -569,7 +587,32 @@ export default function EmpleadosPage() {
                                             </div>
                                         )}
 
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%', flexWrap: 'wrap' }}>
+                                            <button
+                                                onClick={() => toggleActivoEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`, emp.activo)}
+                                                style={{
+                                                    flex: '1 1 100%',
+                                                    background: emp.activo ? '#10b981' : '#6b7280',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.6rem',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    minWidth: 0,
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                    transition: 'all 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '0.35rem'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = emp.activo ? '#059669' : '#4b5563'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = emp.activo ? '#10b981' : '#6b7280'}
+                                            >
+                                                <span>{emp.activo ? '✅' : '⏸️'}</span> {emp.activo ? 'Activo' : 'Inactivo'}
+                                            </button>
                                             <button
                                                 onClick={() => editarEmpleado(emp)}
                                                 style={{
@@ -768,7 +811,35 @@ export default function EmpleadosPage() {
                                                     }) : '-'}
                                                 </td>
                                                 <td style={{ padding: '0.85rem 1rem' }}>
-                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                                        <button
+                                                            onClick={() => toggleActivoEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`, emp.activo)}
+                                                            style={{
+                                                                background: emp.activo ? '#10b981' : '#6b7280',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                padding: '0.5rem 0.85rem',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: '600',
+                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                                transition: 'all 0.2s',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.35rem'
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = emp.activo ? '#059669' : '#4b5563';
+                                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = emp.activo ? '#10b981' : '#6b7280';
+                                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                            }}
+                                                        >
+                                                            <span>{emp.activo ? '✅' : '⏸️'}</span>
+                                                        </button>
                                                         <button
                                                             onClick={() => editarEmpleado(emp)}
                                                             style={{
@@ -795,7 +866,7 @@ export default function EmpleadosPage() {
                                                                 e.currentTarget.style.transform = 'translateY(0)';
                                                             }}
                                                         >
-                                                            <span>✏️</span> Editar
+                                                            <span>✏️</span>
                                                         </button>
                                                         <button
                                                             onClick={() => eliminarEmpleado(emp.id, `${emp.nombre} ${emp.apellido}`)}
@@ -823,7 +894,7 @@ export default function EmpleadosPage() {
                                                                 e.currentTarget.style.transform = 'translateY(0)';
                                                             }}
                                                         >
-                                                            <span>🗑️</span> Eliminar
+                                                            <span>🗑️</span>
                                                         </button>
                                                     </div>
                                                 </td>
