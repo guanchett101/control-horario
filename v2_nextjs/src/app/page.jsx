@@ -15,7 +15,8 @@ export default function Dashboard() {
     const [error, setError] = useState(null);
     const [debugInfo, setDebugInfo] = useState(null);
     const [horaActual, setHoraActual] = useState(new Date());
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(null); // null hasta que se detecte
+    const [isReady, setIsReady] = useState(false); // Controla cuando mostrar contenido
 
     // Authentication Check
     useEffect(() => {
@@ -37,9 +38,10 @@ export default function Dashboard() {
     useEffect(() => {
         if (!user) return;
 
-        // Detectar si es móvil
+        // Detectar si es móvil INMEDIATAMENTE
         const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         setIsMobile(checkMobile);
+        setIsReady(true); // Marcar como listo para mostrar
 
         const interval = setInterval(() => setHoraActual(new Date()), 1000);
 
@@ -102,8 +104,29 @@ export default function Dashboard() {
         return `${dias[fecha.getDay()]}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
     };
 
-    if (!user) {
-        return null; // or loading spinner while redirecting
+    if (!user || !isReady || isMobile === null) {
+        return (
+            <div style={{ 
+                backgroundColor: '#f8f9fa', 
+                minHeight: '100vh', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        border: '4px solid #e5e7eb', 
+                        borderTop: '4px solid #3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        margin: '0 auto 1rem'
+                    }}></div>
+                    <p style={{ color: '#6b7280' }}>Cargando...</p>
+                </div>
+            </div>
+        );
     }
 
     return (

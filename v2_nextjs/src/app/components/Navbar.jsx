@@ -103,6 +103,13 @@ function Navbar({ user, onLogout }) {
                             {isMobile ? '📊' : 'Reportes'}
                         </Link>
                         <Link
+                            href="/perfiles-turno"
+                            style={{ background: isActive('/perfiles-turno') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
+                            title="Perfiles de Turno"
+                        >
+                            {isMobile ? '⏰' : 'Turnos'}
+                        </Link>
+                        <Link
                             href="/visual"
                             style={{ background: isActive('/visual') ? 'rgba(255,255,255,0.15)' : 'transparent' }}
                             title="Personalización Visual"
