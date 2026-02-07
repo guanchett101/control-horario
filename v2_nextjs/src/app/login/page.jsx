@@ -62,7 +62,7 @@ export default function LoginPage() {
             localStorage.setItem('user', JSON.stringify(user));
 
             // Redirect
-            router.push('/');
+            router.replace('/');
         } catch (err) {
             console.error('Login error:', err);
             setError(err.response?.data?.error || 'Error de autenticación. Revisa tus credenciales.');

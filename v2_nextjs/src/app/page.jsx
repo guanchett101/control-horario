@@ -10,6 +10,7 @@ const API_URL = '/api';
 export default function Dashboard() {
     const router = useRouter();
     const [user, setUser] = useState(null);
+    const [authChecked, setAuthChecked] = useState(false);
     const [registrosHoy, setRegistrosHoy] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -30,15 +31,18 @@ export default function Dashboard() {
             const token = localStorage.getItem('token');
 
             if (!storedUser || !token) {
-                router.push('/login');
+                setAuthChecked(true);
+                router.replace('/login');
                 return;
             }
 
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
+            setAuthChecked(true);
         } catch (e) {
             console.error('Error al cargar usuario:', e);
-            router.push('/login');
+            setAuthChecked(true);
+            router.replace('/login');
         }
     }, [router]);
 
@@ -235,7 +239,7 @@ export default function Dashboard() {
         return `${dias[fecha.getDay()]}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
     };
 
-    if (!isReady || isMobile === null) {
+    if (!authChecked || !isReady || isMobile === null) {
         return (
             <div style={{
                 backgroundColor: '#f8f9fa',
@@ -261,7 +265,28 @@ export default function Dashboard() {
     }
 
     if (!user) {
-        return null;
+        return (
+            <div style={{
+                backgroundColor: '#f8f9fa',
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '4px solid #e5e7eb',
+                        borderTop: '4px solid #3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        margin: '0 auto 1rem'
+                    }}></div>
+                    <p style={{ color: '#6b7280' }}>Cargando sesión...</p>
+                </div>
+            </div>
+        );
     }
 
     // VISTA PARA EMPLEADOS (NO ADMIN)

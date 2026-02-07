@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -27,12 +28,27 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Eruda - Consola móvil para debugging */}
-        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-        <script dangerouslySetInnerHTML={{ __html: `
-          if (typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            eruda.init();
-          }
-        `}} />
+        {process.env.NODE_ENV !== 'production' && (
+          <>
+            <Script
+              src="https://cdn.jsdelivr.net/npm/eruda"
+              strategy="afterInteractive"
+            />
+            <Script
+              id="eruda-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  try {
+                    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                      if (window.eruda) window.eruda.init();
+                    }
+                  } catch (e) {}
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ErrorBoundary>
